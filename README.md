@@ -7,7 +7,7 @@ F-Fetch targets low systems. Written in Rust. It's very simple, designed so you 
     ----------------------------------------------------
     |                F-FETCH
     | USERNAME : sh@sh
-    | OS NAME : "Arch"
+    | OS NAME : "Arch Linux"
     | KERNEL VERSION : 6.4.2-arch1-1
     | DESKTOP ENV : Unknown: bspwm
     | MEMORY : 6577 / 12441 MB
