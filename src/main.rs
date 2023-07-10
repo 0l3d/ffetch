@@ -1,4 +1,4 @@
-use std::fs::read_to_string;
+use std::{fs::read_to_string};
 use sysinfo::{System, SystemExt};
 use whoami;
 
@@ -51,7 +51,12 @@ fn get_os_name() -> String {
 }
 
 fn get_hostname() -> String {
-    return whoami::hostname();
+    let mut result : Vec<String> = Vec::new();
+
+    for line in read_to_string("/etc/hostname").unwrap().lines() {
+        result.push(line.to_string());
+    };
+    return result[0].to_string();
 }
 
 fn get_desktop_env() -> String {
