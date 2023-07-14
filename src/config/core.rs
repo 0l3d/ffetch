@@ -24,7 +24,7 @@ pub mod ffetch {
         for line in read_to_string("/proc/cpuinfo").expect("you are not using linux (/proc/cpuinfo is empty)").lines() {
             cpuname_result.push(line.to_string());
         }
-        let result_full: &String = &result[4].split("model name\t: ").collect();
+        let result_full: &String = &cpuname_result[4].split("model name\t: ").collect();
 
         return result_full.to_string();
     }
