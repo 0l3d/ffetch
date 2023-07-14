@@ -1,5 +1,5 @@
 pub mod ffetch {
-    use std::fs::read_to_string;
+    use std::{fs::read_to_string, process::Command};
     use sysinfo::{ System, SystemExt };
     use whoami;
     pub fn get_kernel_version() -> String {
@@ -41,7 +41,7 @@ pub mod ffetch {
     pub fn get_os_name() -> String {
         let mut osname_result: Vec<String> = Vec::new();
 
-        for line in read_to_string("/etc/os-release").expect("you are not using linux (/proc/os-release is empty)").lines() {
+        for line in read_to_string("/etc/os-release").expect("you are not using linux (/etc/os-release is empty)").lines() {
             osname_result.push(line.to_string());
         }
         let result_full: &String = &osname_result[0].split("NAME=").collect();
@@ -51,7 +51,7 @@ pub mod ffetch {
     pub fn get_hostname() -> String {
         let mut hostname_result: Vec<String> = Vec::new();
 
-        for line in read_to_string("/etc/hostname").expect("you are not using linux (/proc/hostname is empty)").lines() {
+        for line in read_to_string("/etc/hostname").expect("you are not using linux (/etc/hostname is empty)").lines() {
             hostname_result.push(line.to_string());
         }
         return hostname_result[0].to_string();
@@ -62,7 +62,9 @@ pub mod ffetch {
     }
 
     pub fn get_cpu_arch() -> String {
-        return whoami::arch().to_string();
+        let get_cpu_arch_command = Command::new("uname").arg("-m").output().expect("uname command error");
+        let get_cpu_arch : String = (String::from_utf8(get_cpu_arch_command.stdout).expect("Error cpu arch from utf8 string")).split("\n").collect();
+        return get_cpu_arch.to_string();
     }
 
     pub fn get_device_name() -> String {
@@ -72,4 +74,11 @@ pub mod ffetch {
     pub fn get_platform() -> String {
         return whoami::platform().to_string();
     }
+
+    pub fn get_uptime() -> String {
+        let uptime_command  = Command::new("uptime").arg("-p").output().expect("uptime command error");
+        let uptime : String = (String::from_utf8(uptime_command.stdout).expect("Error uptime from utf8 string")).split("up ").collect();
+        return uptime.split("\n").collect();
+    }
+
 }

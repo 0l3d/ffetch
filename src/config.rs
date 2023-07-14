@@ -13,6 +13,7 @@ pub fn get_ascii() -> String {
         | DESKTOP ENV :      {}
         | MEMORY :           {} MB
         | CPU :              {} | {}
+        | UPTIME :           {}
         |                                        
         ---------------------------------------------------- 
                     ",
@@ -24,6 +25,7 @@ pub fn get_ascii() -> String {
         ffetch::get_desktop_env(),
         ffetch::get_memory(),
         ffetch::get_cpu_name(),
-        ffetch::get_cpu_arch()
+        ffetch::get_cpu_arch(),
+        ffetch::get_uptime()
     );
 }
