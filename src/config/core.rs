@@ -5,7 +5,7 @@ pub mod ffetch {
     pub fn get_kernel_version() -> String {
         let mut kernel_result: Vec<String> = Vec::new();
 
-        for line in read_to_string("/proc/version").unwrap().lines() {
+        for line in read_to_string("/proc/version").expect("you are not using linux (/proc/version is empty)").lines() {
             kernel_result.push(line.to_string());
         }
 
@@ -19,10 +19,10 @@ pub mod ffetch {
     }
 
     pub fn get_cpu_name() -> String {
-        let mut result: Vec<String> = Vec::new();
+        let mut cpuname_result: Vec<String> = Vec::new();
 
-        for line in read_to_string("/proc/cpuinfo").unwrap().lines() {
-            result.push(line.to_string());
+        for line in read_to_string("/proc/cpuinfo").expect("you are not using linux (/proc/cpuinfo is empty)").lines() {
+            cpuname_result.push(line.to_string());
         }
         let result_full: &String = &result[4].split("model name\t: ").collect();
 
@@ -39,22 +39,22 @@ pub mod ffetch {
     }
 
     pub fn get_os_name() -> String {
-        let mut result: Vec<String> = Vec::new();
+        let mut osname_result: Vec<String> = Vec::new();
 
-        for line in read_to_string("/etc/os-release").unwrap().lines() {
-            result.push(line.to_string());
+        for line in read_to_string("/etc/os-release").expect("you are not using linux (/proc/os-release is empty)").lines() {
+            osname_result.push(line.to_string());
         }
-        let result_full: &String = &result[0].split("NAME=").collect();
+        let result_full: &String = &osname_result[0].split("NAME=").collect();
         return result_full.to_string();
     }
 
     pub fn get_hostname() -> String {
-        let mut result: Vec<String> = Vec::new();
+        let mut hostname_result: Vec<String> = Vec::new();
 
-        for line in read_to_string("/etc/hostname").unwrap().lines() {
-            result.push(line.to_string());
+        for line in read_to_string("/etc/hostname").expect("you are not using linux (/proc/hostname is empty)").lines() {
+            hostname_result.push(line.to_string());
         }
-        return result[0].to_string();
+        return hostname_result[0].to_string();
     }
 
     pub fn get_desktop_env() -> String {

@@ -6,15 +6,16 @@ pub fn get_ascii() -> String {
     return format!("        
         ----------------------------------------------------
         |                F-FETCH
-        | USERNAME : {}@{}
-        | PLATFORM : {}
-        | OS NAME : {}
-        | KERNEL VERSION : {}
-        | DESKTOP ENV : {}
-        | MEMORY : {} MB
-        | CPU : {} | {}
+        | {}@{}
+        | PLATFORM :         {}
+        | OS NAME :          {}
+        | KERNEL VERSION :   {}
+        | DESKTOP ENV :      {}
+        | MEMORY :           {} MB
+        | CPU :              {} | {}
         |                                        
-        ---------------------------------------------------- ",
+        ---------------------------------------------------- 
+                    ",
         ffetch::get_username(),
         ffetch::get_hostname(),
         ffetch::get_platform(),
