@@ -18,6 +18,7 @@ pub fn get_ascii() -> String {
         "user.name",
         "host.name",
         "de",
+        "kernel.version",
     ];
 
 
@@ -51,6 +52,8 @@ pub fn get_ascii() -> String {
             config += &format!("Hostname :      {}\n", ffetch::get_hostname());
         }else if config_map[components] == config_keywords[8] {
             config += &format!("DE :            {}\n", ffetch::get_desktop_env());
+        }else if config_map[components] == config_keywords[9] {
+            config += &format!("Kernel Version :{}\n", ffetch::get_kernel_version());
         }
         components += 1;
     };
