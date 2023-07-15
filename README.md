@@ -11,43 +11,37 @@ use crate::config::core::ffetch;
 
 pub fn get_ascii() -> String {
     return format!("        
-        ----------------------------------------------------
-        |                F-FETCH
-        | USERNAME : {}@{}
-        | PLATFORM : {}
-        | OS NAME : {}
-        | KERNEL VERSION : {}
-        | DESKTOP ENV : {}
-        | MEMORY : {} MB
-        | CPU : {} | {}
-        |                                        
-        ---------------------------------------------------- ",
+
+                {}@{}
+ ▄       ▄      Platform :          {}
+▄ ▀▄   ▄▀ ▄     OS Name :           {}
+█▄█▀███▀█▄█     Kernel Version :    {}
+▀█████████▀     Memory :            {} MB
+ ▄▀     ▀▄      CPU :               {} | {}
+                Uptime :            {}
+                    ",
         ffetch::get_username(),
         ffetch::get_hostname(),
         ffetch::get_platform(),
         ffetch::get_os_name(),
         ffetch::get_kernel_version(),
-        ffetch::get_desktop_env(),
         ffetch::get_memory(),
         ffetch::get_cpu_name(),
-        ffetch::get_cpu_arch()
+        ffetch::get_cpu_arch(),
+        ffetch::get_uptime()
     );
 }
 ```
 
 output
 ```sh
-        ----------------------------------------------------
-        |                F-FETCH
-        | USERNAME : sh@sh
-        | PLATFORM : Linux
-        | OS NAME : "Distro Name"
-        | KERNEL VERSION : 6.4.2-arch1-1
-        | DESKTOP ENV : Unknown: bspwm *
-        | MEMORY : 7078 / 12441 MB
-        | CPU : Intel bla bla | x86_64
-        |                                        
-        ---------------------------------------------------- 
+                name@hostname
+ ▄       ▄      Platform :          Linux
+▄ ▀▄   ▄▀ ▄     OS Name :           "Arch Linux"
+█▄█▀███▀█▄█     Kernel Version :    kernel
+▀█████████▀     Memory :            1000 / 4096 MB
+ ▄▀     ▀▄      CPU :               Intel | x86_64
+                Uptime :            1 hours, 25 minutes
 ```
 
 * If you are using wm, it will say Unknown in the desktop section.
