@@ -8,20 +8,6 @@ use std::collections::BTreeMap;
 
 pub fn get_ascii() -> String {
 
-    let config_keywords = [
-        "user.host",
-        "platform",
-        "os.name",
-        "memory",
-        "cpu",
-        "uptime",
-        "user.name",
-        "host.name",
-        "de",
-        "kernel.version",
-    ];
-
-
     let yaml_code = read_to_string(format!("/home/{}/.config/ffetch/config.yml", ffetch::get_username())).expect(
         "Could not open file."
     );
@@ -29,35 +15,27 @@ pub fn get_ascii() -> String {
 
     //let ascii_art: String = read_to_string(&map["ascii_path"]).expect("Read ascii error : ").split("\t").collect();
 
-    let config_map : Vec<&str> = map["components"].split(",").collect();
+    let config_map : Vec<&str> = map["components"].split(',').collect();
 
-    let mut config : String = "".to_string();
+    let mut config = String::new();
 
-    for mut components in 0..config_map.len() {
-        if config_map[components] == config_keywords[0] {
-            config += &format!("{}@{}\n", ffetch::get_username(), ffetch::get_username());
-        } else if config_map[components] == config_keywords[1] {
-            config += &format!("Platform :      {}\n", ffetch::get_platform());
-        }else if config_map[components] == config_keywords[2] {
-            config += &format!("OS Name :       {}\n", ffetch::get_os_name());
-        }else if config_map[components] == config_keywords[3] {
-            config += &format!("Memory :        {}\n", ffetch::get_memory());
-        } else if config_map[components] == config_keywords[4] {
-            config += &format!("CPU :           {} | {}\n", ffetch::get_cpu_name(), ffetch::get_cpu_arch());
-        }else if config_map[components] == config_keywords[5] {
-            config += &format!("Uptime :        {}\n", ffetch::get_uptime());
-        }else if config_map[components] == config_keywords[6] {
-            config += &format!("Username :      {}\n", ffetch::get_username());
-        }else if config_map[components] == config_keywords[7] {
-            config += &format!("Hostname :      {}\n", ffetch::get_hostname());
-        }else if config_map[components] == config_keywords[8] {
-            config += &format!("DE :            {}\n", ffetch::get_desktop_env());
-        }else if config_map[components] == config_keywords[9] {
-            config += &format!("Kernel Version :{}\n", ffetch::get_kernel_version());
-        }
+    for mut components in 0..config_map.len() {      
+        match config_map[components] {
+            "user.host" => config += &format!("{}@{}\n", ffetch::get_username(), ffetch::get_username()),
+            "platform" => config += &format!("Platform :          {}\n", ffetch::get_platform()),
+            "os.name" => config += &format!("OS Name :           {}\n", ffetch::get_os_name()),
+            "memory" => config += &format!("Memory :            {} MB\n", ffetch::get_memory()),
+            "cpu" => config += &format!("CPU :               {} | {}\n", ffetch::get_cpu_name(), ffetch::get_cpu_arch()),
+            "uptime" => config += &format!("Uptime :            {}\n", ffetch::get_uptime()),
+            "user.name" => config += &format!("User Name :         {}\n", ffetch::get_username()),
+            "host.name" => config += &format!("Host Name :         {}\n", ffetch::get_hostname()),
+            "de" => config += &format!("DE :                {}\n", ffetch::get_desktop_env()),
+            "kernel.version" => config += &format!("Kernel Version :    {}\n", ffetch::get_kernel_version()),
+            _ => ()
+        };
         components += 1;
     };
-    return format!("{}", config.to_string());
+    return config.to_string();
     /*
     return format!("        
 
