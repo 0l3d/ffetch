@@ -62,9 +62,8 @@ pub mod ffetch {
     }
 
     pub fn get_cpu_arch() -> String {
-        let get_cpu_arch_command = Command::new("uname").arg("-m").output().expect("uname command error");
-        let get_cpu_arch : String = (String::from_utf8(get_cpu_arch_command.stdout).expect("Error cpu arch from utf8 string")).split("\n").collect();
-        return get_cpu_arch.to_string();
+        let get_cpu_arch_command = Command::new("lscpu").output().expect("lscpu command error");
+        return get_cpu_arch_command.stdout[0].to_string();
     }
 
     pub fn get_device_name() -> String {
