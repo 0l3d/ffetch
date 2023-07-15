@@ -45,7 +45,7 @@ pub mod ffetch {
             osname_result.push(line.to_string());
         }
         let result_full: &String = &osname_result[0].split("NAME=").collect();
-        return result_full.to_string();
+        return result_full.split("\"").collect();
     }
 
     pub fn get_hostname() -> String {
@@ -62,8 +62,8 @@ pub mod ffetch {
     }
 
     pub fn get_cpu_arch() -> String {
-        let get_cpu_arch_command = Command::new("lscpu").output().expect("lscpu command error");
-        return get_cpu_arch_command.stdout[0].to_string();
+        let get_cpu_arch_command = Command::new("uname").arg("-m").output().expect("lscpu command error");
+        return String::from_utf8(get_cpu_arch_command.stdout).expect("Error : ").split("\n").collect();
     }
 
     pub fn get_device_name() -> String {
