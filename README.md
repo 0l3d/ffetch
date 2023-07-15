@@ -5,7 +5,6 @@ F-Fetch targets low systems. Written in Rust. It's very simple, designed so you 
 
 config.yaml
 ```yml
-ascii_path : /home/sh/.config/ffetch/ascii.txt
 components : "user.host,platform,os.name,memory,cpu,uptime"
 ```
 
