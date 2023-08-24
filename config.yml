@@ -1,2 +1,2 @@
-ascii_path : "./ascii_arts/debian.txt"
+ascii_path : "/home/user/.config/ffetch/ascii_arts/debian.txt"
 components : "user.host,platform,os.name,memory,cpu,uptime,packages"
