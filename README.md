@@ -26,3 +26,5 @@ Uptime :            1 hours, 25 minutes
 * If you are using wm, it will say Unknown in the desktop section.
 
 It is far from colors and visuals! Focused on function only!
+
+# Installation
