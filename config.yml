@@ -1,0 +1,2 @@
+ascii_path : "./ascii_arts/debian.txt"
+components : "user.host,platform,os.name,memory,cpu,uptime,packages"

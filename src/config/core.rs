@@ -66,10 +66,6 @@ pub mod ffetch {
         return String::from_utf8(get_cpu_arch_command.stdout).expect("Error : ").split("\n").collect();
     }
 
-    pub fn get_device_name() -> String {
-        return whoami::devicename().to_string();
-    }
-
     pub fn get_platform() -> String {
         return whoami::platform().to_string();
     }
@@ -78,6 +74,25 @@ pub mod ffetch {
         let uptime_command  = Command::new("uptime").arg("-p").output().expect("uptime command error");
         let uptime : String = (String::from_utf8(uptime_command.stdout).expect("Error uptime from utf8 string")).split("up ").collect();
         return uptime.split("\n").collect();
+    }
+
+    pub fn get_packages() -> String {
+        let getos: &str = &get_os_name();
+        let mut for_var = String::new();
+        let mut return_var: Vec<String> = Vec::new();
+        
+        match getos {
+            "Debian" => for_var = String::from_utf8((Command::new("apt").arg("list").arg("--installed").output().expect("uptime command error")).stdout).expect("Error osname from utf8 string"),
+            "Fedora" => for_var = String::from_utf8((Command::new("dnf").arg("list").arg("installed").output().expect("uptime command error")).stdout).expect("Error osname from utf8 string"),
+            "Arch Linux" => for_var = String::from_utf8((Command::new("pacman").arg("-Q").output().expect("uptime command error")).stdout).expect("Error osname from utf8 string"),
+            _ => ()
+        };
+
+        for line in for_var.lines() {
+            return_var.push(line.to_string());
+        }
+
+        return (return_var.len()).to_string();
     }
 
 }

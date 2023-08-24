@@ -6,56 +6,69 @@ use crate::config::core::ffetch;
 use serde_yaml;
 use std::collections::BTreeMap;
 
+use pad::PadStr;
+
 pub fn get_ascii() -> String {
 
     let yaml_code = read_to_string(format!("/home/{}/.config/ffetch/config.yml", ffetch::get_username())).expect(
         "Could not open file."
     );
     let map: BTreeMap<String, String> = serde_yaml::from_str(&yaml_code).expect("Deserialize error : ");
+    
+    let mut ascii_vec = Vec::new();
 
-    //let ascii_art: String = read_to_string(&map["ascii_path"]).expect("Read ascii error : ").split("\t").collect();
+    for line in read_to_string(&map["ascii_path"]).expect("Read ascii error : ").lines() {
+        ascii_vec.push(line.to_string());
+    }
 
     let config_map : Vec<&str> = map["components"].split(',').collect();
 
     let mut config = String::new();
+    
+    let mut for_end : usize = 0;
+    let mut data = String::new();
+    let mut data_var = String::new();
 
-    for mut components in 0..config_map.len() {      
+   println!("{}a", "Hi there!".with_exact_width(10));
+   
+    for mut trims in 0..ascii_vec[0].len() {
+        data_var += &" ".to_string();
+        trims += 1;
+    }
+
+    for mut components in 0..config_map.len() { 
+        
+        if for_end == ascii_vec.len() {
+            data = data_var.to_string();
+        }  else {
+            data = ascii_vec[for_end].to_string();
+            for_end += 1;
+        }
+
+
+
         match config_map[components] {
-            "user.host" => config += &format!("{}@{}\n", ffetch::get_username(), ffetch::get_username()),
-            "platform" => config += &format!("Platform :          {}\n", ffetch::get_platform()),
-            "os.name" => config += &format!("OS Name :           {}\n", ffetch::get_os_name()),
-            "memory" => config += &format!("Memory :            {} MB\n", ffetch::get_memory()),
-            "cpu" => config += &format!("CPU :               {} | {}\n", ffetch::get_cpu_name(), ffetch::get_cpu_arch()),
-            "uptime" => config += &format!("Uptime :            {}\n", ffetch::get_uptime()),
-            "user.name" => config += &format!("User Name :         {}\n", ffetch::get_username()),
-            "host.name" => config += &format!("Host Name :         {}\n", ffetch::get_hostname()),
-            "de" => config += &format!("DE :                {}\n", ffetch::get_desktop_env()),
-            "kernel.version" => config += &format!("Kernel Version :    {}\n", ffetch::get_kernel_version()),
+            "user.host" => config += &format!("{}{}@{}\n",data,ffetch::get_username(), ffetch::get_username()),
+            "platform" => config += &format!("{}Platform :          {}\n", data, ffetch::get_platform()),
+            "os.name" => config += &format!("{}OS Name :           {}\n", data,ffetch::get_os_name()),
+            "memory" => config += &format!("{}Memory :            {} MB\n", data,ffetch::get_memory()),
+            "cpu" => config += &format!("{}CPU :               {} | {}\n", data,ffetch::get_cpu_name(), ffetch::get_cpu_arch()),
+            "uptime" => config += &format!("{}Uptime :            {}\n", data,ffetch::get_uptime()),
+            "user.name" => config += &format!("{}User Name :         {}\n", data,ffetch::get_username()),
+            "host.name" => config += &format!("{}Host Name :         {}\n", data,ffetch::get_hostname()),
+            "de" => config += &format!("{}DE :                {}\n", data,ffetch::get_desktop_env()),
+            "kernel.version" => config += &format!("{}Kernel Version :    {}\n", data,ffetch::get_kernel_version()),
+            "packages" => config += &format!("{}Packages :          {}\n", data,ffetch::get_packages()),
             _ => ()
         };
         components += 1;
     };
-    return config.to_string();
-    /*
-    return format!("        
 
-                {}@{}
- ▄       ▄      Platform :          {}
-▄ ▀▄   ▄▀ ▄     OS Name :           {}
-█▄█▀███▀█▄█     Kernel Version :    {}
-▀█████████▀     Memory :            {} MB
- ▄▀     ▀▄      CPU :               {} | {}
-                Uptime :            {}
-                    ",
-        ffetch::get_username(),
-        ffetch::get_hostname(),
-        ffetch::get_platform(),
-        ffetch::get_os_name(),
-        ffetch::get_kernel_version(),
-        ffetch::get_memory(),
-        ffetch::get_cpu_name(),
-        ffetch::get_cpu_arch(),
-        ffetch::get_uptime()
-    );
-*/
+    if for_end >= config_map.len() {
+        for ascii_end in for_end..ascii_vec.len() {
+            config += &format!("{}\n", ascii_vec[ascii_end]);
+        }
+    }
+
+    return config.to_string();
 }
