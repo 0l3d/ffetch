@@ -10,9 +10,9 @@ ascii_path : "/home/user/.config/ffetch/ascii_arts/debian.txt"
 components : "user.host,platform,os.name,memory,cpu,uptime,packages"
 ```
 Supported distros : 
-Debian
-Fedora
-Arch Linux
+Debian,
+Fedora,
+Arch Linux,
 
 
 Example
