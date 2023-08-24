@@ -9,7 +9,7 @@ ascii_path : "/home/user/.config/ffetch/ascii_arts/debian.txt"
 components : "user.host,platform,os.name,memory,cpu,uptime,packages"
 ```
 
-output
+Example
 ```sh
 name@hostname
 Platform :          Linux
