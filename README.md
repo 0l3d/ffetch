@@ -28,4 +28,4 @@ Uptime :            1 hours, 25 minutes
 It is far from colors and visuals! Focused on function only!
 
 # Installation
-Check docs/installation.md
+Check [installation.md](https://github.com/0l3d/ffetch/blob/master/docs/installation.md)
