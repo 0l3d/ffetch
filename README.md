@@ -28,3 +28,4 @@ Uptime :            1 hours, 25 minutes
 It is far from colors and visuals! Focused on function only!
 
 # Installation
+Check /doc/installation.md
