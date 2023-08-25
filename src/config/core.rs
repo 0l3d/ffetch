@@ -2,6 +2,10 @@ pub mod ffetch {
     use std::{fs::read_to_string, process::Command};
     use sysinfo::{ System, SystemExt };
     use whoami;
+    use rsbash::rash;
+
+
+
     pub fn get_kernel_version() -> String {
         let mut kernel_result: Vec<String> = Vec::new();
 
@@ -104,6 +108,11 @@ pub mod ffetch {
 
         let cpu_1_1 : String = cpu_lines[1].split("00:02.0 VGA compatible controller: ").collect();
         return cpu_1_1.split(" (rev 02)").collect();
+    }
+
+    pub fn get_shell() -> String {
+        let shell_command = rash!("echo $SHELL").expect("error rash command for shell");
+        return shell_command.1.split("\n").collect();
     }
 
 }

@@ -56,6 +56,7 @@ pub fn get_ascii() -> String {
             "kernel.version" => config += &format!("{}Kernel Version :    {}\n", data,ffetch::get_kernel_version()),
             "packages" => config += &format!("{}Packages :          {}\n", data,ffetch::get_packages()),
             "gpu" => config += &format!("{}GPU :               {}\n", data,ffetch::get_gpu()),
+            "shell" => config += &format!("{}Shell :             {}\n", data,ffetch::get_shell()),
             _ => ()
         };
         components += 1;
