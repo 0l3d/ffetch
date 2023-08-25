@@ -6,8 +6,6 @@ use crate::config::core::ffetch;
 use serde_yaml;
 use std::collections::BTreeMap;
 
-use pad::PadStr;
-
 pub fn get_ascii() -> String {
 
     let yaml_code = read_to_string(format!("/home/{}/.config/ffetch/config.yml", ffetch::get_username())).expect(
