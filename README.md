@@ -14,7 +14,7 @@ Supported distros : Debian, Fedora and Arch Linux
 
 Example
 ```sh
-       _,met$$$$$gg.            xold@xold
+       _,met$$$$$gg.            xold@debian
     ,g$$$$$$$$$$$$$$$P.         Platform :          Linux
   ,g$$P"        """Y$$.".       OS Name :           Debian
  ,$$P'              `$$$.       Memory :            9536 / 12441 MB
