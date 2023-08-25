@@ -8,3 +8,5 @@ components : "user.host,platform,os.name,shell,memory,cpu,gpu,uptime,packages"
 EOF
 mv ascii_arts ~/.config/ffetch
 sudo mv ./release/ffetch /usr/bin/
+cd ..
+rm -rf ./ffetch
