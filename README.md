@@ -1,6 +1,12 @@
 # F-Fetch
 F-Fetch targets low systems. Written in Rust. It's very simple, designed so you can pick it up and replace it.
 
+# Quick Start
+Paste a single line of code into your terminal!
+```sh
+curl https://raw.githubusercontent.com/0l3d/ffetch/master/install.sh | sh
+````
+
 ## First Look 
 
 ~/.config/ffetch/config.yaml
