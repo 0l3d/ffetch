@@ -46,7 +46,7 @@ pub fn get_ascii() -> String {
 
 
         match config_map[components] {
-            "user.host" => config += &format!("{}{}@{}\n",data,ffetch::get_username(), ffetch::get_username()),
+            "user.host" => config += &format!("{}{}@{}\n",data,ffetch::get_username(), ffetch::get_hostname()),
             "platform" => config += &format!("{}Platform :          {}\n", data, ffetch::get_platform()),
             "os.name" => config += &format!("{}OS Name :           {}\n", data,ffetch::get_os_name()),
             "memory" => config += &format!("{}Memory :            {} MB\n", data,ffetch::get_memory()),
