@@ -14,13 +14,23 @@ Supported distros : Debian, Fedora and Arch Linux
 
 Example
 ```sh
-name@hostname
-Platform :          Linux
-OS Name :           Arch Linux
-Kernel Version :    kernel
-Memory :            1000 / 4096 MB
-CPU :               Intel | x86_64
-Uptime :            1 hours, 25 minutes
+       _,met$$$$$gg.            xold@xold
+    ,g$$$$$$$$$$$$$$$P.         Platform :          Linux
+  ,g$$P"        """Y$$.".       OS Name :           Debian
+ ,$$P'              `$$$.       Memory :            9536 / 12441 MB
+',$$P       ,ggs.     `$$b:     CPU :               Intel(R) blabla | x86_64
+`d$$'     ,$P"'   .    $$$      Uptime :            2 hours, 56 minutes
+ $$P      d$'     ,    $$P      Packages :          855
+ $$:      $$.   -    ,d$$'      GPU :               Intel blabla
+ $$;      Y$b._   _,d$P'        
+ Y$$.    `.`"Y$$$$P"'           
+ `$$b      "-.__                
+  `Y$$                          
+   `Y$$.                        
+     `$$b.                      
+       `Y$$b.                   
+          `"Y$b._               
+              `"""              
 ```
 
 * If you are using wm, it will say Unknown in the desktop section.
