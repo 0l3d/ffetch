@@ -41,8 +41,6 @@ pub fn get_ascii() -> String {
             for_end += 1;
         }
 
-
-
         match config_map[components] {
             "user.host" => config += &format!("{}{}@{}\n",data,ffetch::get_username(), ffetch::get_hostname()),
             "platform" => config += &format!("{}Platform :          {}\n", data, ffetch::get_platform()),
