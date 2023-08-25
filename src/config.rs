@@ -28,8 +28,6 @@ pub fn get_ascii() -> String {
     let mut for_end : usize = 0;
     let mut data = String::new();
     let mut data_var = String::new();
-
-   println!("{}a", "Hi there!".with_exact_width(10));
    
     for mut trims in 0..ascii_vec[0].len() {
         data_var += &" ".to_string();
@@ -59,6 +57,7 @@ pub fn get_ascii() -> String {
             "de" => config += &format!("{}DE :                {}\n", data,ffetch::get_desktop_env()),
             "kernel.version" => config += &format!("{}Kernel Version :    {}\n", data,ffetch::get_kernel_version()),
             "packages" => config += &format!("{}Packages :          {}\n", data,ffetch::get_packages()),
+            "gpu" => config += &format!("{}GPU :               {}\n", data,ffetch::get_gpu()),
             _ => ()
         };
         components += 1;
