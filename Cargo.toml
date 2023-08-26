@@ -21,3 +21,4 @@ serde = {version = "1.0.171", features = ["derive"]}
 anyhow = "1.0.71"
 pad = "0.1.6"
 rsbash = "2.1.0"
+termion = "2.0.1"
