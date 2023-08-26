@@ -98,7 +98,7 @@ pub mod ffetch {
 
         return (return_var.len()).to_string();
     }
-
+    /*
     pub fn get_gpu() -> String {
         let cpu_command: String = String::from_utf8(Command::new("lspci").output().expect("lspci command error").stdout).expect("fromutf8 error");
         let mut cpu_lines: Vec<String> = Vec::new();
@@ -106,9 +106,9 @@ pub mod ffetch {
             cpu_lines.push(line.to_string());
         }
 
-        let cpu_1_1 : String = cpu_lines[1].split("00:02.0 VGA compatible controller: ").collect();
-        return cpu_1_1.split(" (rev 02)").collect();
-    }
+        let cpu_1_1 : Vec<String> = cpu_lines[1].split(":");
+        return cpu_1_1;
+    } */
 
     pub fn get_shell() -> String {
         let shell_command = rash!("echo $SHELL").expect("error rash command for shell");

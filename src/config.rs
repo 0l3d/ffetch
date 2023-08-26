@@ -88,7 +88,7 @@ pub fn get_ascii() -> String {
             "de" => config += &format!("{}{}{}{}DE :                {}{}\n", ascii_color_string,data,color::Fg(color::Reset),color_string,ffetch::get_desktop_env(),color::Fg(color::Reset)),
             "kernel.version" => config += &format!("{}{}{}{}Kernel Version :    {}{}\n", ascii_color_string,data,color::Fg(color::Reset),color_string,ffetch::get_kernel_version(),color::Fg(color::Reset)),
             "packages" => config += &format!("{}{}{}{}Packages :          {}{}\n", ascii_color_string,data,color::Fg(color::Reset),color_string,ffetch::get_packages(),color::Fg(color::Reset)),
-            "gpu" => config += &format!("{}{}{}{}GPU :               {}{}\n", ascii_color_string,data,color::Fg(color::Reset),color_string,ffetch::get_gpu(),color::Fg(color::Reset)),
+            //"gpu" => config += &format!("{}{}{}{}GPU :               {}{}\n", ascii_color_string,data,color::Fg(color::Reset),color_string,ffetch::get_gpu(),color::Fg(color::Reset)),
             "shell" => config += &format!("{}{}{}{}Shell :             {}{}\n", ascii_color_string,data,color::Fg(color::Reset),color_string,ffetch::get_shell(),color::Fg(color::Reset)),
             _ => ()
         };
