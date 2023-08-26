@@ -9,6 +9,6 @@ ascii_color : "c.blue;"
 colors : "c.red,c.green,c.yellow,c.blue,c.magenta,c.white,c.white,c.yellow,c.green"
 EOF
 mv ascii_arts ~/.config/ffetch
-cargo install
+cargo install --path .
 cd ..
 rm -rf ./ffetch
