@@ -11,7 +11,7 @@ curl https://raw.githubusercontent.com/0l3d/ffetch/master/install.sh | sh
 
 ~/.config/ffetch/config.yaml
 ```yml
-ascii_path : "/home/xold/.config/ffetch/ascii_arts/fedora.txt"
+ascii_path : "/home/user/.config/ffetch/ascii_arts/fedora.txt"
 #all components : user.host,platform,os.name,memory,cpu,uptime,user.name,host.name,kernel.version,de,packages,shell
 components : "user.host,platform,os.name,shell,memory,cpu,uptime,packages"
 ascii_color : "c.blue;"
