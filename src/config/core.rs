@@ -2,6 +2,10 @@ pub mod ffetch {
     use std::{fs::read_to_string, process::Command};
     use sysinfo::{ System, SystemExt };
     use whoami;
+    use rsbash::rash;
+
+
+   
     pub fn get_kernel_version() -> String {
         let mut kernel_result: Vec<String> = Vec::new();
 
@@ -93,6 +97,22 @@ pub mod ffetch {
         }
 
         return (return_var.len()).to_string();
+    }
+    /*
+    pub fn get_gpu() -> String {
+        let cpu_command: String = String::from_utf8(Command::new("lspci").output().expect("lspci command error").stdout).expect("fromutf8 error");
+        let mut cpu_lines: Vec<String> = Vec::new();
+        for line in cpu_command.lines() {
+            cpu_lines.push(line.to_string());
+        }
+
+        let cpu_1_1 : Vec<String> = cpu_lines[1].split(":");
+        return cpu_1_1;
+    } */
+
+    pub fn get_shell() -> String {
+        let shell_command = rash!("echo $SHELL").expect("error rash command for shell");
+        return shell_command.1.split("\n").collect();
     }
 
 }
