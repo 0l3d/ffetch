@@ -86,9 +86,9 @@ pub mod ffetch {
         let mut return_var: Vec<String> = Vec::new();
         
         match getos {
-            "Debian" => for_var = String::from_utf8((Command::new("apt").arg("list").arg("--installed").output().expect("uptime command error")).stdout).expect("Error osname from utf8 string"),
-            "Fedora" => for_var = String::from_utf8((Command::new("dnf").arg("list").arg("installed").output().expect("uptime command error")).stdout).expect("Error osname from utf8 string"),
-            "Arch Linux" => for_var = String::from_utf8((Command::new("pacman").arg("-Q").output().expect("uptime command error")).stdout).expect("Error osname from utf8 string"),
+            "Debian" => for_var = String::from_utf8((Command::new("apt").arg("list").arg("--installed").output().expect("packages command error")).stdout).expect("Error osname from utf8 string"),
+            "Fedora" => for_var = String::from_utf8((Command::new("dnf").arg("list").arg("installed").output().expect("packages command error")).stdout).expect("Error osname from utf8 string"),
+            "Arch Linux" => for_var = String::from_utf8((Command::new("pacman").arg("-Q").output().expect("packages command error")).stdout).expect("Error osname from utf8 string"),
             _ => ()
         };
 
@@ -98,18 +98,53 @@ pub mod ffetch {
 
         return (return_var.len()).to_string();
     }
-    /*
+
     pub fn get_gpu() -> String {
-        let cpu_command: String = String::from_utf8(Command::new("lspci").output().expect("lspci command error").stdout).expect("fromutf8 error");
-        let mut cpu_lines: Vec<String> = Vec::new();
-        for line in cpu_command.lines() {
-            cpu_lines.push(line.to_string());
+        let gpu_command: String = String::from_utf8(Command::new("lspci").output().expect("lspci command error").stdout).expect("fromutf8 error");
+        let mut gpu_lines: Vec<String> = Vec::new();
+        for line in gpu_command.lines() {
+            gpu_lines.push(line.to_string());
         }
 
-        let cpu_1_1 : Vec<String> = cpu_lines[1].split(":");
-        return cpu_1_1;
-    } */
+        let mut vga_gpu: String = "".to_string();
 
+        for i in 0..gpu_lines.len() {
+            if let Some(result) = gpu_lines[i].find("VGA") {
+                if let Some(inner) = gpu_lines[i].get(result..) {
+                    vga_gpu = inner.split("VGA compatible controller: ").collect();
+                }
+                break;
+            } else {
+                continue;
+            }
+        }
+
+        return vga_gpu;
+    }
+
+    pub fn get_m_gpu() -> String {
+        let gpu_command: String = String::from_utf8(Command::new("lspci").output().expect("lspci command error").stdout).expect("fromutf8 error");
+        let mut gpu_lines: Vec<String> = Vec::new();
+        for line in gpu_command.lines() {
+            gpu_lines.push(line.to_string());
+        }
+
+        let mut m_gpu: String = "".to_string();
+
+        for i in 0..gpu_lines.len() {
+            if let Some(result) = gpu_lines[i].find("3D") {
+                if let Some(inner) = gpu_lines[i].get(result..) {
+                    m_gpu = inner.split("3D controller: ").collect();
+                }
+                break;
+            } else {
+                continue;
+            }
+        }
+
+        return m_gpu;
+    }
+    
     pub fn get_shell() -> String {
         let shell_command = rash!("echo $SHELL").expect("error rash command for shell");
         return shell_command.1.split("\n").collect();
