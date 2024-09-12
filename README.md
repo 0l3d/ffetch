@@ -44,3 +44,6 @@ Example
 * If you are using wm, it will say Unknown in the desktop section.
 
 It is far from colors and visuals! Focused on function only!
+
+# Installation
+Check [installation.md](https://github.com/0l3d/ffetch/blob/master/docs/installation.md)
