@@ -1,0 +1,91 @@
+* Whats is F-Fetch
+F-Fetch is %100 rust system fetch tool.
+
+| Features        |
++----------------+
+| Fast 󰓅         |
+| Minimal       |
+| Flexible 󰿗     |
+| Customizable  |
+| Rust          |
++----------------+
+
+
+** How to configure F-Fetch?
+Minimal:
+#+begin_src
+echo getUsername "@" getHostname
+echo "Distro: " getOsName
+echo "Platform: " getPlatform
+echo "Kernel: " getKernel
+echo "Memory: " getMemory " MB"
+echo "CPU: " getCpu
+echo "GPU: "  getGpu
+echo "Desktop: " getDesktop
+echo "Uptime: "  getUptime
+echo "Shell: " getShell
+ascii = "ascii_text.txt"
+ascii_color = "fg.cyan"
+#+end_src
+
+Middle:
+#+begin_src
+echo t.bold fg.yellow getUsername fg.black "@" fg.yellow getHostname
+echo fg.blue "Distro: " fg.yellow t.bold getOsName
+echo fg.blue "Platform: " fg.yellow t.bold getPlatform
+echo fg.blue "Kernel: " fg.yellow t.bold getKernel
+echo fg.blue "Memory: " fg.yellow t.bold getMemory " MB"
+echo fg.blue "CPU: " fg.yellow t.bold getCpu
+echo fg.blue "GPU: " fg.yellow t.bold getGpu
+echo fg.blue "Desktop: " fg.yellow t.bold getDesktop
+echo fg.blue "Uptime: " fg.yellow t.bold getUptime
+echo fg.blue "Shell: " fg.yellow t.bold getShell
+
+ascii = "ascii_text.txt"
+ascii_color = "fg.cyan"
+#+end_src
+
+Advanced:
+#+begin_src
+echo "╭───────────── " t.underline t.bold fg.yellow getUsername
+echo "│  " t.underline "<U+F0A0> System Information :"
+echo "│    " fg.blue "<U+E779> OS: " fg.cyan getOsName " " t.italic fg.yellow t.bold getArch
+echo "│    " fg.blue "<U+F17C> Kernel: " fg.black getPlatform " " fg.green getKernel
+echo "│    " fg.blue "<U+F233> Hostname: " fg.cyan getHostname
+echo "│    "
+echo "│  " t.underline "<U+F02CA> Hardware Information :"
+echo "│    " fg.yellow "<U+F4BC> CPU: " fg.white t.bold getCpu
+echo "│    " fg.yellow "<U+F0379> GPU: " fg.white t.bold getGpu
+echo "│    " fg.yellow "<U+EFC5> Memory: " fg.white t.bold getMemory fg.yellow " MB"
+echo "│    " fg.yellow "<U+F0C7> Root: " fg.white t.bold getDisk(/)
+echo "│    " fg.yellow "<U+F0C7> Sata: " fg.white t.bold getDisk(/mnt/sata)
+echo "│  " t.underline "<U+F108> Desktop Information :"
+echo "│    " fg.magenta "<U+F0AAB> DE/WM: " fg.white t.bold getDesktop
+echo "│    " fg.magenta "<U+F017> Uptime: " fg.white t.bold getUptime
+echo "│    " fg.magenta "<U+EBC7> Shell: " fg.white t.bold getShell
+echo "╰───────────────────────────────╯"
+
+ascii = "ascii_text.txt"
+ascii_color = "fg.cyan"
+#+end_src
+
+*COMPONENT LIST*
+- USERNAME -> getUsername
+- KERNEL -> getKernel
+- CPU (name) -> getCpu
+- MEMORY -> getMemory
+- HOSTNAME -> getHostname
+- OSNAME -> getOsName
+- DESKTOP ENV -> getDesktop
+- ARCH (cpu arch) -> getArch
+- PLATFORM -> getPlatform
+- UPTIME -> getUptime
+- GPU and mGPU -> getGpu or getMGpu
+- SHELL -> getShell
+- DISK -> getDisk(mountpoint)
+
+
+⚠  The config file does not support comments. Please _DO NOT USE_ any of the following: _#, //, /_
+
+**** Thank you for using this project.
+If you wish to support, you can star the project or buy me a coffee.
