@@ -1,7 +1,7 @@
 * Whats is F-Fetch
 F-Fetch is %100 rust system fetch tool.
 
-| Features        |
+| Features:        |
 | Fast 󰓅         |
 | Minimal       |
 | Flexible 󰿗     |
@@ -11,7 +11,7 @@ F-Fetch is %100 rust system fetch tool.
 
 ** How to configure F-Fetch?
 
-./ok.png
+look : ok.png
 
 
 Minimal:
