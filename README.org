@@ -2,16 +2,18 @@
 F-Fetch is %100 rust system fetch tool.
 
 | Features        |
-+----------------+
 | Fast 󰓅         |
 | Minimal       |
 | Flexible 󰿗     |
 | Customizable  |
 | Rust          |
-+----------------+
 
 
 ** How to configure F-Fetch?
+
+./ok.png
+
+
 Minimal:
 #+begin_src
 echo getUsername "@" getHostname
