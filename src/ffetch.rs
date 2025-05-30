@@ -1,6 +1,8 @@
 pub mod ffetch {
     // use display_info::DisplayInfo;
+    // use machine_info::Machine;
     use rsbash::rash;
+    use std::env;
     use std::{fs::read_to_string, process::Command};
     use sysinfo::{Disks, System};
     use whoami;
@@ -73,7 +75,12 @@ pub mod ffetch {
     }
 
     pub fn get_desktop_env() -> String {
-        return whoami::desktop_env().to_string();
+        let de = env::var("XDG_CURRENT_DESKTOP")
+            .or_else(|_| env::var("DESKTOP_SESSION"))
+            .or_else(|_| env::var("GDMSESSION"))
+            .unwrap_or_else(|_| "Unknown".to_string());
+
+        return de;
     }
 
     pub fn get_cpu_arch() -> String {
