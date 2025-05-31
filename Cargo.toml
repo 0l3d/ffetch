@@ -11,6 +11,9 @@ lto = true
 codegen-units = 1
 panic = "abort"
 
+
+# ADD DEB AND RPM PACKAGING.
+
 [dependencies]
 directories = "5.0.1"
 sysinfo = "0.35.1"
