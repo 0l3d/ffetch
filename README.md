@@ -159,8 +159,41 @@ mv ascii.txt ~/.config/ffetch/ascii.txt
 # Run F-Fetch:
 ffetch
 ```
+---
+
+# ☢️ All Possible Problems and Solutions
+
+You're clearly not on Linux:
+``` text
+you are not using linux
+```
+
+Failed to run uname — really? Make sure uname exists:
+``` text
+uname command error
+```
+
+Failed to run uptime — seriously? Check if uptime is available:
+``` text
+uptime command error
+```
+
+Couldn't detect your GPU with lspci. Are you using WSL or something else?
+``` text
+Failed to execute lspci, not found.
+```
+
+Check your ~/.config/ffetch/ffetch.conf file and make sure ascii="" is set correctly:
+``` text
+Failed to read file
+```
+
+---
+
 
 ## ☕ Support the project!  
 If you like F-Fetch and want to support the development, consider buying me a coffee:
 
 👉 [https://buymeacoffee.com/oled](https://buymeacoffee.com/oled)
+
+

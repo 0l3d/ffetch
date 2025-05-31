@@ -91,7 +91,7 @@ pub mod ffetch {
         let get_cpu_arch_command = Command::new("uname")
             .arg("-m")
             .output()
-            .expect("lscpu command error");
+            .expect("uname command error");
         return String::from_utf8(get_cpu_arch_command.stdout)
             .expect("Error : ")
             .split("\n")
@@ -165,7 +165,7 @@ pub mod ffetch {
     pub fn get_gpu() -> String {
         let output = Command::new("lspci")
             .output()
-            .expect("Failed to execute lspci");
+            .expect("Failed to execute lspci, not found.");
 
         let lspci_output = String::from_utf8_lossy(&output.stdout);
 
@@ -194,7 +194,7 @@ pub mod ffetch {
     pub fn get_m_gpu() -> String {
         let output = Command::new("lspci")
             .output()
-            .expect("Failed to execute lspci");
+            .expect("Failed to execute lspci, not found.");
 
         let lspci_output = String::from_utf8_lossy(&output.stdout);
 

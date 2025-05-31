@@ -5,20 +5,9 @@ use lazy_static::lazy_static;
 use once_cell::sync::Lazy;
 use regex::Regex;
 
-fn read_lines(filename: &str) -> Vec<String> {
-    let mut result = Vec::new();
-    for line in fs::read_to_string(filename)
-        .expect("Failed to read config file.")
-        .lines()
-    {
-        result.push(line.to_string())
-    }
-    result
-}
-
 lazy_static! {
-    static ref DISK_REGEX: Regex = Regex::new(r"getDisk\((.*?)\)").unwrap();
-    static ref MON_REGEX: Regex = Regex::new(r"getMonitor\((.*?)\)").unwrap();
+    static ref DISK_REGEX: Regex = Regex::new(r"getDisk\((.*?)\)").expect("Regex error:");
+    static ref MON_REGEX: Regex = Regex::new(r"getMonitor\((.*?)\)").expect("Regex error:");
     static ref USERNAME: String = ffetch::ffetch::get_username();
     static ref KERNEL: String = ffetch::ffetch::get_kernel_version();
     static ref CPU: String = ffetch::ffetch::get_cpu_name();
@@ -40,7 +29,7 @@ lazy_static! {
 
 static CONTENTS: Lazy<Vec<String>> = Lazy::new(|| {
     fs::read_to_string(&*PATH)
-        .expect("Failed to read config file")
+        .expect("Failed to read file")
         .lines()
         .map(|s| s.to_string())
         .collect()
