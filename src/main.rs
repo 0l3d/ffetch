@@ -5,6 +5,17 @@ use lazy_static::lazy_static;
 use once_cell::sync::Lazy;
 use regex::Regex;
 
+fn read_lines(filename: &str) -> Vec<String> {
+    let mut result = Vec::new();
+    for line in fs::read_to_string(filename)
+        .expect("Failed to read file.")
+        .lines()
+    {
+        result.push(line.to_string())
+    }
+    result
+}
+
 lazy_static! {
     static ref DISK_REGEX: Regex = Regex::new(r"getDisk\((.*?)\)").expect("Regex error:");
     static ref MON_REGEX: Regex = Regex::new(r"getMonitor\((.*?)\)").expect("Regex error:");

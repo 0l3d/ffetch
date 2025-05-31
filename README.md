@@ -188,6 +188,13 @@ Check your ~/.config/ffetch/ffetch.conf file and make sure ascii="" is set corre
 Failed to read file
 ```
 
+Check the getMonitor() function in your configuration. If you're only using one monitor, either remove getMonitor(1) or add your third monitor.
+``` text
+index out of bound
+```
+
+If the disk is not showing up, check getDisk() in the config and make sure it's using a valid mountpoint, like getDisk(/).
+
 ---
 
 
