@@ -1,11 +1,15 @@
 pub mod ffetch {
-    // use display_info::DisplayInfo;
-    // use machine_info::Machine;
+    use display_info::DisplayInfo;
+    use lazy_static::lazy_static;
     use rsbash::rash;
     use std::env;
     use std::{fs::read_to_string, process::Command};
     use sysinfo::{Disks, System};
     use whoami;
+
+    lazy_static! {
+        static ref DISPLAY_INFORMATION: Vec<DisplayInfo> = DisplayInfo::all().unwrap();
+    }
 
     pub fn get_kernel_version() -> String {
         let mut kernel_result: Vec<String> = Vec::new();
@@ -209,33 +213,23 @@ pub mod ffetch {
         let shell_command = rash!("echo $SHELL").expect("error rash command for shell");
         return shell_command.1.split("\n").collect();
     }
-    /*
-     *
-     * SO SLOW FOR MY PROGRAM
-     * FIXME: FIND WHY WORKING SLOWLY AND FIX IT
-     * TODO: MONITOR FEATURE
-        pub fn get_monitor(monitor_index: usize) -> String {
-            let display_information = DisplayInfo::all().unwrap();
+    pub fn get_monitor(monitor_index: usize) -> String {
+        let mut trues = "";
 
-            let mut trues = "";
-
-            if display_information[monitor_index].is_primary {
-                trues = "*";
-            }
-
-            let all_of_things = format!(
-                "{} {}x{} {} Hz {}",
-                display_information[monitor_index].friendly_name,
-                display_information[monitor_index].width,
-                display_information[monitor_index].height,
-                display_information[monitor_index].frequency,
-                trues
-            );
-            return all_of_things;
-
-            return String::new();
+        if DISPLAY_INFORMATION[monitor_index].is_primary {
+            trues = "*";
         }
-    */
+
+        let all_of_things = format!(
+            "{} {}x{} {} Hz {}",
+            DISPLAY_INFORMATION[monitor_index].friendly_name,
+            DISPLAY_INFORMATION[monitor_index].width,
+            DISPLAY_INFORMATION[monitor_index].height,
+            DISPLAY_INFORMATION[monitor_index].frequency,
+            trues
+        );
+        return all_of_things;
+    }
 
     pub fn get_disks(disk_point: &str) -> String {
         let disks = Disks::new_with_refreshed_list();

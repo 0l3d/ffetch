@@ -18,6 +18,7 @@ fn read_lines(filename: &str) -> Vec<String> {
 
 lazy_static! {
     static ref DISK_REGEX: Regex = Regex::new(r"getDisk\((.*?)\)").unwrap();
+    static ref MON_REGEX: Regex = Regex::new(r"getMonitor\((.*?)\)").unwrap();
     static ref USERNAME: String = ffetch::ffetch::get_username();
     static ref KERNEL: String = ffetch::ffetch::get_kernel_version();
     static ref CPU: String = ffetch::ffetch::get_cpu_name();
@@ -52,6 +53,14 @@ fn comp_with_disk_argument(input: &str) -> String {
     String::new()
 }
 
+fn comp_with_mon_argument(input: &str) -> usize {
+    if let Some(caps) = MON_REGEX.captures(input) {
+        let matched_str = caps.get(1).unwrap().as_str();
+        return matched_str.parse::<usize>().unwrap_or(0);
+    }
+    0
+}
+
 fn find_token(string: &str, findstr: &str) -> bool {
     let tokens: &Vec<&str> = &string.split(" ").collect();
     for i in 0..tokens.len() {
@@ -65,6 +74,10 @@ fn find_token(string: &str, findstr: &str) -> bool {
 fn replace_syntax(conf: &str) -> String {
     let disk = comp_with_disk_argument(conf);
     let diskf = format!("getDisk({})", disk);
+
+    let monitor = comp_with_mon_argument(conf);
+    let monitorf = format!("getMonitor({})", monitor);
+    let index: usize = monitor;
 
     let replaced_conf: String = conf
         // strings
@@ -84,7 +97,7 @@ fn replace_syntax(conf: &str) -> String {
         .replace("getMGpu", &mGPU)
         .replace("getShell", &SHELL)
         .replace(&diskf, &ffetch::ffetch::get_disks(&disk))
-        // so slow... .replace("getMonitor", &ffetch::ffetch::get_monitor(0))
+        .replace(&monitorf, &ffetch::ffetch::get_monitor(index))
         // Fg Colors
         .replace("fg.black", "\x1b[30m")
         .replace("fg.red", "\x1b[31m")
@@ -99,7 +112,7 @@ fn replace_syntax(conf: &str) -> String {
         .replace("fg.bright_green", "\x1b[92m")
         .replace("fg.bright_yellow", "\x1b[93m")
         .replace("fg.bright_blue", "\x1b[94m")
-        .replace("fg.bright_magenta", "\x1b[95m")
+        .replace("fg.bright _magenta", "\x1b[95m")
         .replace("fg.bright_cyan", "\x1b[96m")
         .replace("fg.bright_white", "\x1b[97m")
         // Bg Colors
