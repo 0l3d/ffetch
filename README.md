@@ -146,7 +146,7 @@ ascii_color = "fg.cyan"
 
 ```bash
 # Clone the repo and build:
-git clone https://github.com/username/ffetch.git
+git clone https://github.com/0l3d/ffetch.git
 cd ffetch
 cargo build --release
 sudo cp target/release/ffetch /usr/local/bin/
