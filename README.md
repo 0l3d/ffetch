@@ -67,8 +67,12 @@ At its core, it works simply and the codebase is easy to understand. 💡
 - `getMonitor(monitorindex)`  
   Returns the **Monitor** information for the specified monitor index.
   
-- `getPackages` (Not yet available)  
-  Would return the number of installed packages.
+- `getPackages` (Available on Arch Linux, Debian, Fedora)  
+  Returns the **number of installed packages**.
+
+- `getLocale`  
+  Returns your system **locale** (e.g., `en_US`).
+
 
 
 ---
