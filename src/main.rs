@@ -32,6 +32,7 @@ lazy_static! {
     static ref SHELL: String = ffetch::ffetch::get_shell();
     static ref GPU: String = ffetch::ffetch::get_gpu();
     static ref mGPU: String = ffetch::ffetch::get_m_gpu();
+    static ref PACKAGES: String = ffetch::ffetch::get_packages();
     static ref PATH: String = format!(
         "/home/{}/.config/ffetch/ffetch.conf",
         ffetch::ffetch::get_username()
@@ -92,7 +93,7 @@ fn replace_syntax(conf: &str) -> String {
         .replace("getArch", &ARCH)
         .replace("getPlatform", &PLATFORM)
         .replace("getUptime", &UPTIME)
-        // not yet available. .replace("getPackages", &ffetch::ffetch::get_packages())
+        .replace("getPackages", &PACKAGES)
         .replace("getGpu", &GPU)
         .replace("getMGpu", &mGPU)
         .replace("getShell", &SHELL)
