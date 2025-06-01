@@ -104,7 +104,7 @@ echo "│    " fg.magenta "󱡶 Secondary: " fg.white t.bold getMonitor(1)
 echo "│    " fg.magenta " Shell: " fg.white t.bold getShell
 echo "╰───────────────────────────────╯"
 
-ascii = "/home/username/.config/ffetch/ascii.txt"
+ascii = "/home/getUsername/.config/ffetch/ascii.txt"
 ascii_color = "fg.cyan"
 ```
 
@@ -123,7 +123,7 @@ echo fg.blue "Primary: " fg.yellow t.bold getMonitor(0)
 echo fg.blue "Uptime: " fg.yellow t.bold getUptime
 echo fg.blue "Shell: " fg.yellow t.bold getShell
 
-ascii = "ascii_text.txt"
+ascii = "/home/getUsername/.config/ffetch/ascii.txt"
 ascii_color = "fg.cyan"
 ```
 
@@ -142,7 +142,7 @@ echo "Primary: " getMonitor(0)
 echo "Uptime: "  getUptime
 echo "Shell: " getShell
 
-ascii = "ascii_text.txt"
+ascii = "/home/getUsername/.config/ffetch/ascii.txt"
 ascii_color = "fg.cyan"
 ```
 ---

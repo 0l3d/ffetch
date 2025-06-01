@@ -173,7 +173,8 @@ fn get_option(token: &str) -> String {
                     newsplt += &tokenizer[tk];
                     output = newsplt.split('"').collect();
                     output.replace_range(0..1, "");
-                    return output;
+                    let routput = output.replace("getUsername", &USERNAME);
+                    return routput;
                 }
             }
         } else {
