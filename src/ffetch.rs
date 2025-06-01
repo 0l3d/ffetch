@@ -26,6 +26,12 @@ pub mod ffetch {
         return kernel_result_full[2].to_string();
     }
 
+    pub fn get_locale() -> String {
+        env::var("LC_ALL")
+            .or_else(|_| env::var("LANG"))
+            .unwrap_or_else(|_| "C".to_string())
+    }
+
     pub fn get_username() -> String {
         return whoami::username();
     }

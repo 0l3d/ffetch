@@ -26,6 +26,7 @@ lazy_static! {
     static ref HOSTNAME: String = ffetch::ffetch::get_hostname();
     static ref OSNAME: String = ffetch::ffetch::get_os_name();
     static ref DESKTOP: String = ffetch::ffetch::get_desktop_env();
+    static ref LOCALE: String = ffetch::ffetch::get_locale();
     static ref ARCH: String = ffetch::ffetch::get_cpu_arch();
     static ref PLATFORM: String = ffetch::ffetch::get_platform();
     static ref UPTIME: String = ffetch::ffetch::get_uptime();
@@ -97,6 +98,7 @@ fn replace_syntax(conf: &str) -> String {
         .replace("getGpu", &GPU)
         .replace("getMGpu", &mGPU)
         .replace("getShell", &SHELL)
+        .replace("getLocale", &LOCALE)
         .replace(&diskf, &ffetch::ffetch::get_disks(&disk))
         .replace(&monitorf, &ffetch::ffetch::get_monitor(index))
         // Fg Colors
