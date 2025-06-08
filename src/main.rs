@@ -1,11 +1,31 @@
 pub mod ffetch;
-use std::fs;
+use std::{fs, io::Write, path::Path};
 
 use lazy_static::lazy_static;
 use once_cell::sync::Lazy;
 use regex::Regex;
 
 fn read_lines(filename: &str) -> Vec<String> {
+    if !Path::new(filename).exists() {
+        let mut file = fs::File::create(filename).expect("file create error.");
+        let content = r#"
+           #####
+          #######
+          ##O#O##
+          #######
+        ###########
+       #############
+      ###############
+      ################
+     #################
+   #####################
+   #####################
+     #################
+"#;
+        file.write_all(content.as_bytes())
+            .expect("file write error.");
+    }
+
     let mut result = Vec::new();
     for line in fs::read_to_string(filename)
         .expect("Failed to read file.")
@@ -42,6 +62,30 @@ lazy_static! {
 }
 
 static CONTENTS: Lazy<Vec<String>> = Lazy::new(|| {
+    if !Path::new(&*PATH).exists() {
+        let mut file = fs::File::create(&*PATH).expect("file create error.");
+        let content = r#"
+# middle config
+echo t.bold fg.yellow getUsername fg.black "@" fg.yellow getHostname
+echo fg.blue "Distro: " fg.yellow t.bold getOsName
+echo fg.blue "Platform: " fg.yellow t.bold getPlatform
+echo fg.blue "Kernel: " fg.yellow t.bold getKernel
+echo fg.blue "Memory: " fg.yellow t.bold getMemory " MB"
+echo fg.blue "CPU: " fg.yellow t.bold getCpu
+echo fg.blue "GPU: " fg.yellow t.bold getGpu
+echo fg.blue "Packages: " fg.yellow t.bold getPackages
+echo fg.blue "Disk: " fg.yellow t.bold getDisk(/)
+echo fg.blue "Desktop: " fg.yellow t.bold getDesktop
+echo fg.blue "Primary: " fg.yellow t.bold getMonitor(0)
+echo fg.blue "Uptime: " fg.yellow t.bold getUptime
+echo fg.blue "Shell: " fg.yellow t.bold getShell
+
+ascii = "/home/getUsername/.config/ffetch/ascii.txt"
+ascii_color = "fg.cyan"
+"#;
+        file.write_all(content.as_bytes())
+            .expect("file write error.");
+    }
     fs::read_to_string(&*PATH)
         .expect("Failed to read file")
         .lines()
