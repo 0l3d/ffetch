@@ -22,7 +22,7 @@ case "$install_choice" in
       cd "$DIR"
       git pull
     else
-      git clone --depth 1 "$REPO"
+      git clone --depth=1 "$REPO" "$DIR"
       cd "$DIR"
     fi
 
@@ -47,23 +47,25 @@ case "$install_choice" in
     ;;
 
   2)
-    echo "Downloading latest release..."
-    DOWNLOAD_URL=$(curl -s https://api.github.com/repos/0l3d/ffetch/releases/latest | grep "browser_download_url.*linux.tar.gz" | cut -d '"' -f 4)
+    echo "Downloading latest release binary..."
+
+    DOWNLOAD_URL=$(curl -s https://api.github.com/repos/0l3d/ffetch/releases/latest \
+      | grep -oP '"browser_download_url": "\K[^"]*ffetch-[^"]+-linux[^"]+\.tar\.gz')
 
     if [ -z "$DOWNLOAD_URL" ]; then
-      echo "Error: Could not find release URL"
+      echo "Error: Could not find release download URL."
       exit 1
     fi
 
-    curl -L "$DOWNLOAD_URL" -o ffetch-linux.tar.gz
-    tar -xzf ffetch-linux.tar.gz
+    echo "Download URL: $DOWNLOAD_URL"
+    curl -L "$DOWNLOAD_URL" -o ffetch.tar.gz
+    tar -xzf ffetch.tar.gz
     chmod +x ffetch
     BINARY_PATH="$(pwd)/ffetch"
     echo "Download complete: $BINARY_PATH"
-    rm ffetch-linux.tar.gz
+    rm ffetch.tar.gz
 
-    # Shallow clone for ascii files etc.
-    git clone --depth 1 "$REPO" "$DIR"
+    git clone "$REPO" "$DIR"
     ;;
   *)
     echo "Invalid choice"
@@ -77,7 +79,7 @@ mkdir -p ~/.config/ffetch
 
 echo "Select configuration profile:"
 echo "1) Advanced"
-echo "2) Middle"
+echo "2) Middle" 
 echo "3) Minimal"
 echo -n "Choice [1-3]: "
 read config_choice
@@ -98,40 +100,27 @@ else
 fi
 
 echo ""
-echo "Fetching ASCII art list from GitHub..."
+echo "Fetching ASCII art list from remote repository..."
+ASCII_LIST=$(curl -s https://api.github.com/repos/0l3d/ffetch/contents/ascii | grep '"name":' | cut -d '"' -f 4)
 
-ASCII_API_URL="https://api.github.com/repos/0l3d/ffetch/contents/ascii"
-ascii_files=()
-
-mapfile -t ascii_files < <(curl -s "$ASCII_API_URL" | grep -oP '(?<="name": ")[^"]+')
-
-if [ ${#ascii_files[@]} -eq 0 ]; then
-  echo "No ASCII art files found on GitHub."
+if [ -z "$ASCII_LIST" ]; then
+  echo "No ASCII files found in remote repo."
 else
-  echo "Select ASCII art:"
-  for i in "${!ascii_files[@]}"; do
-    filename="${ascii_files[$i]}"
-    echo "$((i+1))) ${filename%.*}"
+  mapfile -t ascii_array <<< "$ASCII_LIST"
+  for i in "${!ascii_array[@]}"; do
+    name=$(basename "${ascii_array[$i]}" .txt)
+    echo "$((i+1))) $name"
   done
 
-  echo -n "Choice [1-${#ascii_files[@]}]: "
+  echo -n "Select ASCII art [1-${#ascii_array[@]}]: "
   read ascii_choice
 
-  if [[ "$ascii_choice" =~ ^[0-9]+$ ]] && [ "$ascii_choice" -ge 1 ] && [ "$ascii_choice" -le "${#ascii_files[@]}" ]; then
-    selected_ascii="${ascii_files[$((ascii_choice-1))]}"
-    raw_url="https://raw.githubusercontent.com/0l3d/ffetch/master/ascii/$selected_ascii"
-
-    mkdir -p ~/.config/ffetch
-    echo "Downloading $selected_ascii ..."
-    curl -sL "$raw_url" -o ~/.config/ffetch/ascii.txt
-
-    if [ $? -eq 0 ]; then
-      echo "ASCII art downloaded and saved to ~/.config/ffetch/ascii.txt"
-    else
-      echo "Failed to download ASCII art."
-    fi
+  if [[ "$ascii_choice" =~ ^[0-9]+$ ]] && [ "$ascii_choice" -ge 1 ] && [ "$ascii_choice" -le "${#ascii_array[@]}" ]; then
+    ascii_file="${ascii_array[$((ascii_choice - 1))]}"
+    curl -s -L "https://raw.githubusercontent.com/0l3d/ffetch/master/ascii/$ascii_file" -o ~/.config/ffetch/ascii.txt
+    echo "ASCII art saved to ~/.config/ffetch/ascii.txt"
   else
-    echo "Invalid choice, skipping ASCII art download."
+    echo "Invalid choice. Skipping ASCII art."
   fi
 fi
 
