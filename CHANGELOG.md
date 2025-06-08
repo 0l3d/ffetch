@@ -1,4 +1,5 @@
-# [0.2.2] Features
+# [0.2.4] Features
 
-# NEW 
-- Added package managers for `getPackages`
+### What's Changed?
+- README.md
+- Improved skills of installation script.

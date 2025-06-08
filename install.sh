@@ -5,7 +5,8 @@ DIR="ffetch"
 echo "Select installation method:"
 echo "1) Build from source (Git version)"
 echo "2) Download release binary"
-read -rp "Choice [1-2]: " install_choice
+echo -n "Choice [1-2]: "
+read install_choice
 
 case "$install_choice" in
   1)
@@ -13,7 +14,8 @@ case "$install_choice" in
     echo "1) Balanced (Balanced size & performance)"
     echo "2) Size (Size optimized)"
     echo "3) Performance (Performance optimized)"
-    read -rp "Choice [1-3]: " choice
+    echo -n "Choice [1-3]: "
+    read choice
 
     if [ -d "$DIR" ]; then
       cd "$DIR"
@@ -40,19 +42,12 @@ case "$install_choice" in
     fi
 
     echo "Build done. Binary: $(pwd)/target/$profile_dir/ffetch"
+    BINARY_PATH="$(pwd)/target/$profile_dir/ffetch"
     ;;
 
   2)
-    # Check if curl is available
-    if ! command -v curl &> /dev/null; then
-      echo "Error: curl is required but not installed"
-      echo "Please install curl: sudo apt install curl"
-      exit 1
-    fi
-
     echo "Downloading latest release..."
 
-    # Get latest release download URL
     DOWNLOAD_URL=$(curl -s https://api.github.com/repos/0l3d/ffetch/releases/latest | grep "browser_download_url.*linux.tar.gz" | cut -d '"' -f 4)
 
     if [ -z "$DOWNLOAD_URL" ]; then
@@ -62,22 +57,90 @@ case "$install_choice" in
 
     echo "Downloading from: $DOWNLOAD_URL"
 
-    # Download and extract
     curl -L "$DOWNLOAD_URL" -o ffetch-linux.tar.gz
     tar -xzf ffetch-linux.tar.gz
 
-    # Make executable
     chmod +x ffetch
 
     echo "Download complete. Binary: $(pwd)/ffetch"
-    echo "You can move it to your PATH: sudo mv ffetch /usr/local/bin/"
+    BINARY_PATH="$(pwd)/ffetch"
 
-    # Cleanup
     rm ffetch-linux.tar.gz
     ;;
 
   *)
     echo "Invalid choice"
     exit 1
+    ;;
+esac
+
+echo ""
+echo "Setting up configuration..."
+mkdir -p ~/.config/ffetch
+
+echo "Select configuration profile:"
+echo "1) Advanced"
+echo "2) Middle"
+echo "3) Minimal"
+echo -n "Choice [1-3]: "
+read config_choice
+
+case "$config_choice" in
+  1) CONFIG_FILE="ffetch-advanced.conf" ;;
+  2) CONFIG_FILE="ffetch-middle.conf" ;;
+  3) CONFIG_FILE="ffetch-minimal.conf" ;;
+  *) echo "Invalid choice, using middle config"; CONFIG_FILE="ffetch-middle.conf" ;;
+esac
+
+if [ -f "$CONFIG_FILE" ]; then
+  cp "$CONFIG_FILE" ~/.config/ffetch/ffetch.conf
+  echo "Configuration copied: $CONFIG_FILE -> ~/.config/ffetch/ffetch.conf"
+else
+  echo "Warning: Configuration file $CONFIG_FILE not found"
+fi
+
+if [ -d "ascii" ]; then
+  echo ""
+  echo "Select ASCII art:"
+  ascii_files=(ascii/*.txt)
+  if [ ${#ascii_files[@]} -gt 0 ] && [ -f "${ascii_files[0]}" ]; then
+    for i in "${!ascii_files[@]}"; do
+      filename=$(basename "${ascii_files[i]}" .txt)
+      echo "$((i+1))) $filename"
+    done
+    echo -n "Choice [1-${#ascii_files[@]}]: "
+    read ascii_choice
+
+    if [[ "$ascii_choice" =~ ^[0-9]+$ ]] && [ "$ascii_choice" -ge 1 ] && [ "$ascii_choice" -le "${#ascii_files[@]}" ]; then
+      selected_ascii="${ascii_files[$((ascii_choice-1))]}"
+      cp "$selected_ascii" ~/.config/ffetch/ascii.txt
+      echo "ASCII art copied: $(basename "$selected_ascii") -> ~/.config/ffetch/ascii.txt"
+    else
+      echo "Invalid choice, skipping ASCII setup"
+    fi
+  else
+    echo "No ASCII files found in ascii/ directory"
+  fi
+else
+  echo "ASCII directory not found, skipping ASCII setup"
+fi
+
+echo ""
+echo -n "Move ffetch to /usr/local/bin? [y/N]: "
+read move_binary
+
+case "$move_binary" in
+  [Yy]|[Yy][Ee][Ss])
+    sudo cp "$BINARY_PATH" /usr/local/bin/ffetch
+    echo "ffetch moved to /usr/local/bin/"
+    echo ""
+    echo "Installation complete! You can now run: ffetch"
+    ;;
+  *)
+    echo ""
+    echo "Installation complete!"
+    echo "Binary location: $BINARY_PATH"
+    echo "You can run: $BINARY_PATH"
+    echo "Or move it manually: sudo cp $BINARY_PATH /usr/local/bin/"
     ;;
 esac
