@@ -152,13 +152,8 @@ ascii_color = "fg.cyan"
 # ⚙️ **Installation & Configuration**
 
 ```bash
-# Run Install
-./install.sh
-
-# Setup configuration:
-mkdir -p ~/.config/ffetch
-mv ffetch-yourconfig.conf ~/.config/ffetch/ffetch.conf
-mv ./ascii/ascii.txt ~/.config/ffetch/ascii.txt
+# Run Installation Script
+bash <(curl -s https://raw.githubusercontent.com/0l3d/ffetch/main/install.sh)
 
 # Run F-Fetch:
 ffetch
