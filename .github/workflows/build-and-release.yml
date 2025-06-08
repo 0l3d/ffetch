@@ -1,64 +1,90 @@
-name: Build and Release Rust Binary
+name: Release
 
 on:
   push:
     tags:
-      - 'v*' 
+      - 'v*'
+  workflow_dispatch:
 
-permissions:
-  contents: write
+env:
+  CARGO_TERM_COLOR: always
 
 jobs:
   build:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+    - name: Checkout code
+      uses: actions/checkout@v4
 
-      - name: Set up Rust toolchain
-        uses: actions-rs/toolchain@v1
-        with:
-          toolchain: stable
-          profile: minimal
-          override: true
+    - name: Setup Rust
+      uses: actions-rs/toolchain@v1
+      with:
+        toolchain: stable
+        override: true
+        profile: minimal
 
-      - name: Build with 'size' profile
-        run: cargo build --profile size
+    - name: Install system dependencies
+      run: |
+        sudo apt-get update -y
+        sudo apt-get install -y \
+          pkg-config \
+          libxcb1-dev \
+          libxcb-render0-dev \
+          libxcb-shape0-dev \
+          libxcb-xfixes0-dev \
+          libxcb-shm0-dev \
+          libx11-dev \
+          libxrandr-dev \
+          libxext-dev \
+          libxss-dev
 
-      - name: Build with 'performance' profile
-        run: cargo build --profile performance
+    - name: Cache cargo
+      uses: actions/cache@v3
+      with:
+        path: |
+          ~/.cargo/registry/index/
+          ~/.cargo/registry/cache/
+          ~/.cargo/git/db/
+        key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
 
-      - name: Build with 'balanced' profile
-        run: cargo build --release
+    - name: Build release
+      uses: actions-rs/cargo@v1
+      with:
+        command: build
+        args: --release
 
-      - name: Create GitHub Release
-        id: create_release
-        uses: taiki-e/create-gh-release-action@v1
-        with:
-          changelog: CHANGELOG.md
-          token: ${{ secrets.GITHUB_TOKEN }}
+    - name: Get binary name
+      id: binary-name
+      run: |
+        BINARY_NAME=$(grep '^name = ' Cargo.toml | head -1 | cut -d '"' -f2)
+        echo "binary-name=${BINARY_NAME}" >> $GITHUB_OUTPUT
 
-      - name: Upload 'size' binary to release
-        uses: taiki-e/upload-rust-binary-action@v1
-        with:
-          bin: ffetch
-          archive: ffetch-size
-          target: x86_64-unknown-linux-gnu
-          token: ${{ secrets.GITHUB_TOKEN }}
+    - name: Create archive
+      run: |
+        BINARY_NAME="${{ steps.binary-name.outputs.binary-name }}"
+        ARCHIVE_NAME="${BINARY_NAME}-x86_64-unknown-linux-gnu"
+        
+        mkdir -p "${ARCHIVE_NAME}"
+        cp "target/release/${BINARY_NAME}" "${ARCHIVE_NAME}/"
+        [ -f README.md ] && cp README.md "${ARCHIVE_NAME}/"
+        [ -f LICENSE ] && cp LICENSE "${ARCHIVE_NAME}/"
+        
+        tar czf "${ARCHIVE_NAME}.tar.gz" "${ARCHIVE_NAME}"
+        echo "ASSET_PATH=${ARCHIVE_NAME}.tar.gz" >> $GITHUB_ENV
 
-      - name: Upload 'performance' binary to release
-        uses: taiki-e/upload-rust-binary-action@v1
-        with:
-          bin: ffetch
-          archive: ffetch-performance
-          target: x86_64-unknown-linux-gnu
-          token: ${{ secrets.GITHUB_TOKEN }}
+    - name: Get version
+      id: version
+      run: |
+        VERSION=${GITHUB_REF#refs/tags/}
+        echo "version=${VERSION}" >> $GITHUB_OUTPUT
 
-      - name: Upload 'balanced' binary to release
-        uses: taiki-e/upload-rust-binary-action@v1
-        with:
-          bin: ffetch
-          archive: ffetch-balanced
-          target: x86_64-unknown-linux-gnu
-          token: ${{ secrets.GITHUB_TOKEN }}
+    - name: Create release
+      uses: softprops/action-gh-release@v1
+      with:
+        tag_name: ${{ steps.version.outputs.version }}
+        name: Release ${{ steps.version.outputs.version }}
+        files: ${{ env.ASSET_PATH }}
+        generate_release_notes: true
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
