@@ -2,77 +2,35 @@
 REPO="https://github.com/0l3d/ffetch.git"
 DIR="ffetch"
 
-echo "Select installation method:"
-echo "1) Build from source (Git version)"
-echo "2) Download release binary"
-echo -n "Choice [1-2]: "
-read install_choice
+echo "Cloning repository..."
+git clone --depth=1 "$REPO"
+cd "$DIR" || { echo "Failed to enter directory $DIR"; exit 1; }
 
-case "$install_choice" in
-  1)
-    echo "Select build profile:"
-    echo "1) Balanced (Balanced size & performance)"
-    echo "2) Size (Size optimized)"
-    echo "3) Performance (Performance optimized)"
-    echo -n "Choice [1-3]: "
-    read choice
+echo "Select build profile:"
+echo "1) Balanced (Balanced size & performance)"
+echo "2) Size (Size optimized)"
+echo "3) Performance (Performance optimized)"
+echo -n "Choice [1-3]: "
+read choice
 
-    if [ -d "$DIR" ]; then
-      cd "$DIR"
-      git pull
-    else
-      git clone "$REPO"
-      cd "$DIR"
-    fi
-
-    case "$choice" in
-      1) cargo build --release ;;
-      2) cargo build --profile size ;;
-      3) cargo build --profile performance ;;
-      *) echo "Invalid choice"; exit 1 ;;
-    esac
-
-    profile_dir=""
-    if [ "$choice" -eq 1 ]; then
-      profile_dir="release"
-    elif [ "$choice" -eq 2 ]; then
-      profile_dir="size"
-    elif [ "$choice" -eq 3 ]; then
-      profile_dir="performance"
-    fi
-
-    echo "Build done. Binary: $(pwd)/target/$profile_dir/ffetch"
-    BINARY_PATH="$(pwd)/target/$profile_dir/ffetch"
-    ;;
-
-  2)
-    echo "Downloading latest release..."
-
-    DOWNLOAD_URL=$(curl -s https://api.github.com/repos/0l3d/ffetch/releases/latest | grep "browser_download_url.*linux.tar.gz" | cut -d '"' -f 4)
-
-    if [ -z "$DOWNLOAD_URL" ]; then
-      echo "Error: Could not find release download URL"
-      exit 1
-    fi
-
-    echo "Downloading from: $DOWNLOAD_URL"
-
-    curl -L "$DOWNLOAD_URL" -o ffetch-linux.tar.gz
-    tar -xzf ffetch-linux.tar.gz
-
-    chmod +x ffetch
-
-    echo "Download complete. Binary: $(pwd)/ffetch"
-    BINARY_PATH="$(pwd)/ffetch"
-
-    rm ffetch-linux.tar.gz
-    ;;
-
-  *)
-    echo "Invalid choice"
-    exit 1
-    ;;
+case "$choice" in
+  1) cargo build --release ;;
+  2) cargo build --profile size ;;
+  3) cargo build --profile performance ;;
+  *) echo "Invalid choice"; exit 1 ;;
 esac
+
+profile_dir=""
+if [ "$choice" -eq 1 ]; then
+  profile_dir="release"
+elif [ "$choice" -eq 2 ]; then
+  profile_dir="size"
+elif [ "$choice" -eq 3 ]; then
+  profile_dir="performance"
+fi
+
+BINARY_PATH="$(pwd)/target/$profile_dir/ffetch"
+echo "Build complete: $BINARY_PATH"
 
 echo ""
 echo "Setting up configuration..."
@@ -80,7 +38,7 @@ mkdir -p ~/.config/ffetch
 
 echo "Select configuration profile:"
 echo "1) Advanced"
-echo "2) Middle"
+echo "2) Middle" 
 echo "3) Minimal"
 echo -n "Choice [1-3]: "
 read config_choice
@@ -95,17 +53,20 @@ esac
 if [ -f "$CONFIG_FILE" ]; then
   cp "$CONFIG_FILE" ~/.config/ffetch/ffetch.conf
   echo "Configuration copied: $CONFIG_FILE -> ~/.config/ffetch/ffetch.conf"
+elif [ -f "$DIR/$CONFIG_FILE" ]; then
+  cp "$DIR/$CONFIG_FILE" ~/.config/ffetch/ffetch.conf
+  echo "Configuration copied: $DIR/$CONFIG_FILE -> ~/.config/ffetch/ffetch.conf"
 else
   echo "Warning: Configuration file $CONFIG_FILE not found"
 fi
 
+echo ""
 if [ -d "ascii" ]; then
-  echo ""
   echo "Select ASCII art:"
-  ascii_files=(ascii/*.txt)
-  if [ ${#ascii_files[@]} -gt 0 ] && [ -f "${ascii_files[0]}" ]; then
+  ascii_files=(ascii/*)
+  if [ ${#ascii_files[@]} -gt 0 ]; then
     for i in "${!ascii_files[@]}"; do
-      filename=$(basename "${ascii_files[i]}" .txt)
+      filename=$(basename "${ascii_files[i]}")
       echo "$((i+1))) $filename"
     done
     echo -n "Choice [1-${#ascii_files[@]}]: "
@@ -144,3 +105,4 @@ case "$move_binary" in
     echo "Or move it manually: sudo cp $BINARY_PATH /usr/local/bin/"
     ;;
 esac
+
