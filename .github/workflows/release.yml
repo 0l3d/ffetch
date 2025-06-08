@@ -33,7 +33,23 @@ jobs:
         [ -f LICENSE ] && cp LICENSE release/
         [ -f CHANGELOG.md ] && cp CHANGELOG.md release/
         tar -czf $BINARY_NAME-linux.tar.gz -C release .
-        [ -d ascii ] && tar -czf ascii.tar.gz ascii/
+        
+        # ASCII dizini varsa ayrı tar oluştur
+        if [ -d "ascii" ]; then
+          echo "ASCII directory found, listing contents:"
+          ls -la ascii/
+          echo "Creating ascii.tar.gz..."
+          tar -czf ascii.tar.gz ascii/ || echo "Failed to create ascii.tar.gz"
+          if [ -f ascii.tar.gz ]; then
+            echo "ascii.tar.gz created successfully"
+            ls -la ascii.tar.gz
+          else
+            echo "ascii.tar.gz NOT created!"
+          fi
+        else
+          echo "ASCII directory not found"
+          ls -la .
+        fi
     - name: Release
       uses: softprops/action-gh-release@v2
       with:
