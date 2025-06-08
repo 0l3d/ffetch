@@ -34,7 +34,6 @@ jobs:
         [ -f CHANGELOG.md ] && cp CHANGELOG.md release/
         tar -czf $BINARY_NAME-linux.tar.gz -C release .
         
-        # ASCII dizini varsa ayrı tar oluştur
         if [ -d "ascii" ]; then
           echo "ASCII directory found, listing contents:"
           ls -la ascii/
