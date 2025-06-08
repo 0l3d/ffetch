@@ -33,8 +33,10 @@ jobs:
         [ -f LICENSE ] && cp LICENSE release/
         [ -f CHANGELOG.md ] && cp CHANGELOG.md release/
         tar -czf $BINARY_NAME-linux.tar.gz -C release .
+        [ -d ascii ] && tar -czf ascii.tar.gz ascii/
     - name: Release
       uses: softprops/action-gh-release@v2
       with:
-        files: "*.tar.gz"
+        files: |
+          *.tar.gz
         body_path: CHANGELOG.md
