@@ -1,48 +1,64 @@
-name: Build and Release
+name: Build and Release Rust Binary
 
 on:
   push:
     tags:
-      - 'v*'
-  workflow_dispatch:
+      - 'v*' 
+
+permissions:
+  contents: write
 
 jobs:
-  build_release:
+  build:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v3
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-    - name: Install build dependencies
-      run: |
-        sudo apt-get update
-        sudo apt-get install -y build-essential libxcb1-dev libx11-dev libxext-dev
+      - name: Set up Rust toolchain
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+          profile: minimal
+          override: true
 
-    - name: Install GitHub CLI
-      run: |
-        curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg | sudo tee /usr/share/keyrings/githubcli-archive-keyring.gpg >/dev/null
-        sudo apt update
-        sudo apt install gh
-  
-    - name: Install Rust toolchain
-      uses: actions-rs/toolchain@v1
-      with:
-        toolchain: stable
-        override: true
+      - name: Build with 'size' profile
+        run: cargo build --profile size
 
-    - name: Build release
-      run: cargo build --release
-    
-    - name: Create GitHub Release
-      run: |
-        gh auth login --with-token < ${{ secrets.GITHUB_TOKEN }}
-        gh release create ${{ github.ref_name }} ./target/release/ffetch --title "Release ${{ github.ref_name }}" --notes "Release notes for ${{ github.ref_name }}"
+      - name: Build with 'performance' profile
+        run: cargo build --profile performance
 
+      - name: Build with 'balanced' profile
+        run: cargo build --release
 
-    - name: Upload Release Asset
-      uses: actions/upload-release-asset@v1
-      with:
-        upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: ./target/release/ffetch
-        asset_name: ffetch
-        asset_content_type: application/octet-stream
+      - name: Create GitHub Release
+        id: create_release
+        uses: taiki-e/create-gh-release-action@v1
+        with:
+          changelog: CHANGELOG.md
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Upload 'size' binary to release
+        uses: taiki-e/upload-rust-binary-action@v1
+        with:
+          bin: ffetch
+          archive: ffetch-size
+          target: x86_64-unknown-linux-gnu
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Upload 'performance' binary to release
+        uses: taiki-e/upload-rust-binary-action@v1
+        with:
+          bin: ffetch
+          archive: ffetch-performance
+          target: x86_64-unknown-linux-gnu
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Upload 'balanced' binary to release
+        uses: taiki-e/upload-rust-binary-action@v1
+        with:
+          bin: ffetch
+          archive: ffetch-balanced
+          target: x86_64-unknown-linux-gnu
+          token: ${{ secrets.GITHUB_TOKEN }}
