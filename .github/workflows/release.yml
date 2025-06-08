@@ -1,14 +1,14 @@
 name: Release
+
 on:
   push:
     tags:
       - 'v*.*.*'
-  create:
-    tags:
-      - 'v*.*.*'
   workflow_dispatch:
+
 permissions:
   contents: write
+
 jobs:
   release:
     runs-on: ubuntu-latest
@@ -16,25 +16,42 @@ jobs:
     steps:
     - name: Checkout
       uses: actions/checkout@v4
+      
     - name: Setup Rust
       uses: dtolnay/rust-toolchain@stable
+      
     - name: Install dependencies
       run: |
         sudo apt-get update
         sudo apt-get install -y pkg-config libxcb1-dev libxcb-render0-dev libxcb-shape0-dev libxcb-xfixes0-dev libxcb-shm0-dev libx11-dev
+        
     - name: Build
       run: cargo build --release
-    - name: Create archive
+      
+    - name: Get binary name and version
+      id: get_info
       run: |
         BINARY_NAME=$(grep '^name = ' Cargo.toml | head -1 | cut -d '"' -f2)
-        mkdir release
-        cp target/release/$BINARY_NAME release/
-        [ -f README.md ] && cp README.md release/
-        [ -f LICENSE ] && cp LICENSE release/
-        [ -f CHANGELOG.md ] && cp CHANGELOG.md release/
-        tar -czf $BINARY_NAME-linux.tar.gz -C release .
-    - name: Release
+        VERSION=${GITHUB_REF#refs/tags/}
+        echo "binary_name=$BINARY_NAME" >> $GITHUB_OUTPUT
+        echo "version=$VERSION" >> $GITHUB_OUTPUT
+        echo "archive_name=$BINARY_NAME-$VERSION-linux-x86_64.tar.gz" >> $GITHUB_OUTPUT
+        
+    - name: Create archive
+      run: |
+        mkdir -p release
+        cp target/release/${{ steps.get_info.outputs.binary_name }} release/
+        [ -f README.md ] && cp README.md release/ || true
+        [ -f LICENSE ] && cp LICENSE release/ || true
+        [ -f CHANGELOG.md ] && cp CHANGELOG.md release/ || true
+        tar -czf ${{ steps.get_info.outputs.archive_name }} -C release .
+        
+    - name: Create Release
       uses: softprops/action-gh-release@v2
       with:
-        files: "*.tar.gz"
+        files: ${{ steps.get_info.outputs.archive_name }}
         body_path: CHANGELOG.md
+        draft: false
+        prerelease: false
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
