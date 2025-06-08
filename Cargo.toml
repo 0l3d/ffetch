@@ -1,15 +1,31 @@
 [package]
 name = "ffetch"
-version = "0.2.0"
+version = "0.2.1"
 edition = "2024"
 
+
+# RELEASE IS
 [profile.release]
-debug = true
-strip = true
-opt-level = "z"
+opt-level = 3
 lto = true
 codegen-units = 1
 panic = "abort"
+strip = "symbols"
+debug = false
+
+[profile.performance]
+inherits = "release"
+opt-level = 3
+codegen-units = 16
+lto = false
+
+[profile.size]
+inherits = "release"
+opt-level = "z"
+codegen-units = 1
+lto = true
+panic = "abort"
+strip = "symbols"
 
 
 # ADD DEB AND RPM PACKAGING.
