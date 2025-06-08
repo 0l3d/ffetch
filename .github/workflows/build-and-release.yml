@@ -14,7 +14,10 @@ jobs:
     - uses: actions/checkout@v3
 
     - name: Install build dependencies
-      run: sudo apt-get update && sudo apt-get install -y build-essential
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y build-essential libxcb1-dev libx11-dev libxext-dev
+
 
     - name: Install Rust toolchain
       uses: actions-rs/toolchain@v1
