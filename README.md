@@ -67,7 +67,7 @@ At its core, it works simply and the codebase is easy to understand. 💡
 - `getMonitor(monitorindex)`  
   Returns the **Monitor** information for the specified monitor index.
   
-- `getPackages` (Available on Arch Linux, Debian, Fedora)  
+- `getPackages` (emerge, flatpak, apt, dnf, yum, pacman, zypper, nix-env, xbps-query)  
   Returns the **number of installed packages**.
 
 - `getLocale`  
@@ -86,6 +86,8 @@ echo "│  " t.underline " System Information :"
 echo "│    " fg.blue " OS: " fg.cyan getOsName " " t.italic fg.yellow t.bold getArch
 echo "│    " fg.blue " Kernel: " fg.black getPlatform " " fg.green getKernel
 echo "│    " fg.blue " Hostname: " fg.cyan getHostname
+echo "│    " fg.blue " Packages: " fg.cyan getPackages
+echo "│    " fg.blue " Locale: " fg.cyan getLocale
 echo "│    "
 echo "│  " t.underline "󰋊 Hardware Information :"
 echo "│    "
@@ -93,14 +95,12 @@ echo "│    " fg.yellow " CPU: " fg.white t.bold getCpu
 echo "│    " fg.yellow "󰍹 GPU: " fg.white t.bold getGpu
 echo "│    " fg.yellow " Memory: " fg.white t.bold getMemory fg.yellow " MB"
 echo "│    " fg.yellow " Root: " fg.white t.bold getDisk(/)
-echo "│    " fg.yellow " Sata: " fg.white t.bold getDisk(/mnt/sata)
 echo "│    "
 echo "│  " t.underline " Desktop Information :"
 echo "│    "
 echo "│    " fg.magenta "󰪫 DE/WM: " fg.white t.bold getDesktop
 echo "│    " fg.magenta " Uptime: " fg.white t.bold getUptime
 echo "│    " fg.magenta "󰧨 Primary: " fg.white t.bold getMonitor(0)
-echo "│    " fg.magenta "󱡶 Secondary: " fg.white t.bold getMonitor(1)
 echo "│    " fg.magenta " Shell: " fg.white t.bold getShell
 echo "╰───────────────────────────────╯"
 
@@ -117,6 +117,7 @@ echo fg.blue "Kernel: " fg.yellow t.bold getKernel
 echo fg.blue "Memory: " fg.yellow t.bold getMemory " MB"
 echo fg.blue "CPU: " fg.yellow t.bold getCpu
 echo fg.blue "GPU: " fg.yellow t.bold getGpu
+echo fg.blue "Packages" fg.yellow t.bold getPackages
 echo fg.blue "Disk: " fg.yellow t.bold getDisk(/)
 echo fg.blue "Desktop: " fg.yellow t.bold getDesktop
 echo fg.blue "Primary: " fg.yellow t.bold getMonitor(0)
@@ -136,6 +137,7 @@ echo "Kernel: " getKernel
 echo "Memory: " getMemory " MB"
 echo "CPU: " getCpu
 echo "GPU: "  getGpu
+echo "Packages: " getPackages
 echo "Disk: " getDisk(/)
 echo "Desktop: " getDesktop
 echo "Primary: " getMonitor(0)
@@ -144,6 +146,7 @@ echo "Shell: " getShell
 
 ascii = "/home/getUsername/.config/ffetch/ascii.txt"
 ascii_color = "fg.cyan"
+
 ```
 ---
 # ⚙️ **Installation & Configuration**
@@ -158,7 +161,7 @@ sudo cp target/release/ffetch /usr/local/bin/
 # Setup configuration:
 mkdir -p ~/.config/ffetch
 mv ffetch-yourconfig.conf ~/.config/ffetch/ffetch.conf
-mv ascii.txt ~/.config/ffetch/ascii.txt
+mv ./ascii/ascii.txt ~/.config/ffetch/ascii.txt
 
 # Run F-Fetch:
 ffetch

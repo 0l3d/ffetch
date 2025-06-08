@@ -5,6 +5,7 @@ pub mod ffetch {
     use std::env;
     use std::{fs::read_to_string, process::Command};
     use sysinfo::{Disks, System};
+    use which::which;
     use whoami;
 
     lazy_static! {
@@ -23,7 +24,7 @@ pub mod ffetch {
 
         let kernel_result_full: Vec<_> = kernel_result[0].split(" ").collect();
 
-        return kernel_result_full[2].to_string();
+        kernel_result_full[2].to_string()
     }
 
     pub fn get_locale() -> String {
@@ -33,7 +34,7 @@ pub mod ffetch {
     }
 
     pub fn get_username() -> String {
-        return whoami::username();
+        whoami::username()
     }
 
     pub fn get_cpu_name() -> String {
@@ -47,7 +48,7 @@ pub mod ffetch {
         }
         let result_full: &String = &cpuname_result[4].split("model name\t: ").collect();
 
-        return result_full.to_string();
+        result_full.to_string()
     }
 
     pub fn get_memory() -> String {
@@ -56,7 +57,7 @@ pub mod ffetch {
         let total_memory = sys.total_memory() / 1000000;
         let used_memory = sys.used_memory() / 1000000;
 
-        return format!("{} / {}", used_memory, total_memory);
+        format!("{} / {}", used_memory, total_memory)
     }
 
     pub fn get_os_name() -> String {
@@ -69,7 +70,7 @@ pub mod ffetch {
             osname_result.push(line.to_string());
         }
         let result_full: &String = &osname_result[0].split("NAME=").collect();
-        return result_full.split("\"").collect();
+        result_full.split("\"").collect()
     }
 
     pub fn get_hostname() -> String {
@@ -81,16 +82,14 @@ pub mod ffetch {
         {
             hostname_result.push(line.to_string());
         }
-        return hostname_result[0].to_string();
+        hostname_result[0].to_string()
     }
 
     pub fn get_desktop_env() -> String {
-        let de = env::var("XDG_CURRENT_DESKTOP")
+        env::var("XDG_CURRENT_DESKTOP")
             .or_else(|_| env::var("DESKTOP_SESSION"))
             .or_else(|_| env::var("GDMSESSION"))
-            .unwrap_or_else(|_| "Unknown".to_string());
-
-        return de;
+            .unwrap_or_else(|_| "Unknown".to_string())
     }
 
     pub fn get_cpu_arch() -> String {
@@ -98,14 +97,14 @@ pub mod ffetch {
             .arg("-m")
             .output()
             .expect("uname command error");
-        return String::from_utf8(get_cpu_arch_command.stdout)
+        String::from_utf8(get_cpu_arch_command.stdout)
             .expect("Error : ")
             .split("\n")
-            .collect();
+            .collect()
     }
 
     pub fn get_platform() -> String {
-        return whoami::platform().to_string();
+        whoami::platform().to_string()
     }
 
     pub fn get_uptime() -> String {
@@ -117,57 +116,40 @@ pub mod ffetch {
             .expect("Error uptime from utf8 string"))
         .split("up ")
         .collect();
-        return uptime.split("\n").collect();
+        uptime.split("\n").collect()
     }
 
     pub fn get_packages() -> String {
-        let getos: &str = &get_os_name();
-        let mut for_var = String::new();
-        let mut return_var: Vec<String> = Vec::new();
+        let mut res = Vec::new();
 
-        match getos {
-            "Debian" => {
-                for_var = String::from_utf8(
-                    (Command::new("apt")
-                        .arg("list")
-                        .arg("--installed")
-                        .output()
-                        .expect("packages command error"))
-                    .stdout,
-                )
-                .expect("Error osname from utf8 string")
-            }
-            "Fedora" => {
-                for_var = String::from_utf8(
-                    (Command::new("dnf")
-                        .arg("list")
-                        .arg("installed")
-                        .output()
-                        .expect("packages command error"))
-                    .stdout,
-                )
-                .expect("Error osname from utf8 string")
-            }
-            "Arch Linux" => {
-                for_var = String::from_utf8(
-                    (Command::new("pacman")
-                        .arg("-Q")
-                        .output()
-                        .expect("packages command error"))
-                    .stdout,
-                )
-                .expect("Error osname from utf8 string")
-            }
-            _ => (),
-        };
+        let managers = [
+            ("emerge", vec!["qlist", "-I"]),
+            ("flatpak", vec!["flatpak", "list"]),
+            ("apt-get", vec!["apt-get", "list", "--installed"]),
+            ("dnf", vec!["dnf", "list", "installed"]),
+            ("yum", vec!["yum", "list", "installed"]),
+            ("pacman", vec!["pacman", "-Q"]),
+            ("zypper", vec!["zypper", "se", "--installed-only"]),
+            ("nix", vec!["nix-env", "-q"]),
+            ("xbps", vec!["xbps-query", "-l"]),
+        ];
 
-        for line in for_var.lines() {
-            return_var.push(line.to_string());
+        for (name, cmd) in managers.iter() {
+            if which(cmd[0]).is_ok() {
+                let output = Command::new(&cmd[0])
+                    .args(&cmd[1..])
+                    .output()
+                    .expect("Command failed");
+
+                let stdout = String::from_utf8_lossy(&output.stdout);
+                let count = stdout.lines().count();
+
+                res.push(format!("{} ({})", count, name));
+            }
         }
 
-        return (return_var.len()).to_string();
+        res.join(" ")
     }
-
     pub fn get_gpu() -> String {
         let output = Command::new("lspci")
             .output()
@@ -217,7 +199,7 @@ pub mod ffetch {
 
     pub fn get_shell() -> String {
         let shell_command = rash!("echo $SHELL").expect("error rash command for shell");
-        return shell_command.1.split("\n").collect();
+        shell_command.1.split("\n").collect()
     }
     pub fn get_monitor(monitor_index: usize) -> String {
         let mut trues = "";
@@ -234,7 +216,7 @@ pub mod ffetch {
             DISPLAY_INFORMATION[monitor_index].frequency,
             trues
         );
-        return all_of_things;
+        all_of_things
     }
 
     pub fn get_disks(disk_point: &str) -> String {
@@ -248,6 +230,6 @@ pub mod ffetch {
                 return return_point;
             }
         }
-        return String::new();
+        String::new()
     }
 }

@@ -19,6 +19,7 @@ fn read_lines(filename: &str) -> Vec<String> {
 lazy_static! {
     static ref DISK_REGEX: Regex = Regex::new(r"getDisk\((.*?)\)").expect("Regex error:");
     static ref MON_REGEX: Regex = Regex::new(r"getMonitor\((.*?)\)").expect("Regex error:");
+    static ref PKG_REGEX: Regex = Regex::new(r"getPackages\((.*?)\)").expect("Regex error:");
     static ref USERNAME: String = ffetch::ffetch::get_username();
     static ref KERNEL: String = ffetch::ffetch::get_kernel_version();
     static ref CPU: String = ffetch::ffetch::get_cpu_name();
@@ -31,9 +32,9 @@ lazy_static! {
     static ref PLATFORM: String = ffetch::ffetch::get_platform();
     static ref UPTIME: String = ffetch::ffetch::get_uptime();
     static ref SHELL: String = ffetch::ffetch::get_shell();
+    static ref PACKAGES: String = ffetch::ffetch::get_packages();
     static ref GPU: String = ffetch::ffetch::get_gpu();
     static ref mGPU: String = ffetch::ffetch::get_m_gpu();
-    static ref PACKAGES: String = ffetch::ffetch::get_packages();
     static ref PATH: String = format!(
         "/home/{}/.config/ffetch/ffetch.conf",
         ffetch::ffetch::get_username()
@@ -148,7 +149,7 @@ fn replace_syntax(conf: &str) -> String {
         .replace("t.inverse_off", "\x1b[27m")
         .replace("all.reset", "\x1b[0m");
 
-    return replaced_conf;
+    replaced_conf
 }
 
 fn find_char(string: &str, target: char) -> bool {
@@ -170,7 +171,7 @@ fn get_option(token: &str) -> String {
             if tokena[0] == token && find_char(tokens, '"') {
                 let mut newsplt: String = String::new();
                 for tk in 1..tokenizer.len() {
-                    newsplt += &tokenizer[tk];
+                    newsplt += tokenizer[tk];
                     output = newsplt.split('"').collect();
                     output.replace_range(0..1, "");
                     let routput = output.replace("getUsername", &USERNAME);
@@ -225,7 +226,7 @@ fn write_fetch(ascii: Vec<String>, ascii_color: String) -> String {
     let mut ascii_index = 0;
     for i in 0..CONTENTS.len() {
         let tokens = &CONTENTS[i];
-        let lexed_conf: String = lex_config(&tokens);
+        let lexed_conf: String = lex_config(tokens);
         let replaced_conf = replace_syntax(&lexed_conf);
 
         if find_token(tokens, "echo") {
