@@ -38,13 +38,7 @@ jobs:
           echo "ASCII directory found, listing contents:"
           ls -la ascii/
           echo "Creating ascii.tar.gz..."
-          tar -czf ascii.tar.gz ascii/ || echo "Failed to create ascii.tar.gz"
-          if [ -f ascii.tar.gz ]; then
-            echo "ascii.tar.gz created successfully"
-            ls -la ascii.tar.gz
-          else
-            echo "ascii.tar.gz NOT created!"
-          fi
+          tar -czf ascii.tar.gz ascii/ && echo "ascii.tar.gz created successfully" || echo "Failed to create ascii.tar.gz"
         else
           echo "ASCII directory not found"
           ls -la .
