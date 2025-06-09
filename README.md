@@ -52,6 +52,9 @@ At its core, it works simply and the codebase is easy to understand. 💡
 - `getUptime`  
   Returns the system **Uptime**.
 
+- `getTerm`  
+  Returns the current **Terminal Emulator**.
+
 - `getGpu`  
   Returns the primary **GPU Information**.
 
@@ -176,6 +179,7 @@ echo "│    " fg.magenta "󰪫 DE/WM: " fg.white t.bold getDesktop
 echo "│    " fg.magenta " Uptime: " fg.white t.bold getUptime
 echo "│    " fg.magenta "󰧨 Primary: " fg.white t.bold getMonitor(0)
 echo "│    " fg.magenta " Shell: " fg.white t.bold getShell
+echo "│    " fg.magenta " Terminal: " fg.white t.bold getTerm
 echo "╰───────────────────────────────╯"
 
 ascii = "/home/getUsername/.config/ffetch/ascii.txt"
@@ -196,6 +200,7 @@ echo fg.blue "Disk: " fg.yellow t.bold getDisk(/)
 echo fg.blue "Desktop: " fg.yellow t.bold getDesktop
 echo fg.blue "Primary: " fg.yellow t.bold getMonitor(0)
 echo fg.blue "Uptime: " fg.yellow t.bold getUptime
+echo fg.blue "Terminal: " fg.yellow t.bold getTerm
 echo fg.blue "Shell: " fg.yellow t.bold getShell
 
 ascii = "/home/getUsername/.config/ffetch/ascii.txt"
@@ -215,6 +220,7 @@ echo "Packages: " getPackages
 echo "Disk: " getDisk(/)
 echo "Desktop: " getDesktop
 echo "Primary: " getMonitor(0)
+echo "Terminal: " getTerm
 echo "Uptime: "  getUptime
 echo "Shell: " getShell
 

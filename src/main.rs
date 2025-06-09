@@ -48,6 +48,7 @@ lazy_static! {
     static ref MON_REGEX: Regex = Regex::new(r"getMonitor\((.*?)\)").expect("Regex error:");
     static ref PKG_REGEX: Regex = Regex::new(r"getPackages\((.*?)\)").expect("Regex error:");
     static ref USERNAME: String = ffetch::ffetch::get_username();
+    static ref TERMINAL: String = ffetch::ffetch::get_terminal();
     static ref KERNEL: String = ffetch::ffetch::get_kernel_version();
     static ref CPU: String = ffetch::ffetch::get_cpu_name();
     static ref MEMORY: String = ffetch::ffetch::get_memory();
@@ -158,6 +159,7 @@ fn replace_syntax(conf: &str) -> String {
         .replace("getMGpu", &mGPU)
         .replace("getShell", &SHELL)
         .replace("getLocale", &LOCALE)
+        .replace("getTerm", &TERMINAL)
         .replace(&diskf, &ffetch::ffetch::get_disks(&disk))
         .replace(&monitorf, &ffetch::ffetch::get_monitor(index))
         // Fg Colors

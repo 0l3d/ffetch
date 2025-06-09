@@ -1,4 +1,4 @@
-# [0.2.4] 
+# [0.2.5] 
 
 ### What's Changed?
-- Fixed some bugs
+- Added getTerm

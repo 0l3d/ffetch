@@ -1,6 +1,7 @@
 pub mod ffetch {
     use display_info::DisplayInfo;
     use lazy_static::lazy_static;
+    use regex::Regex;
     use rsbash::rash;
     use std::env;
     use std::{fs::read_to_string, process::Command};
@@ -10,6 +11,8 @@ pub mod ffetch {
 
     lazy_static! {
         static ref DISPLAY_INFORMATION: Vec<DisplayInfo> = DisplayInfo::all().unwrap();
+        static ref REGEX: Regex = Regex::new(r"window id # (0x[0-9a-f]+)").unwrap();
+        static ref NAME_REGEX: Regex = Regex::new(r#""([^"]+)""#).unwrap();
     }
 
     pub fn get_kernel_version() -> String {
@@ -290,6 +293,41 @@ pub mod ffetch {
             trues
         );
         all_of_things
+    }
+
+    pub fn get_terminal() -> String {
+        let output = Command::new("xprop")
+            .args(["-root", "_NET_ACTIVE_WINDOW"])
+            .output()
+            .expect("xprop run error.");
+
+        let stdout = String::from_utf8_lossy(&output.stdout);
+
+        let window_id = match REGEX.captures(&stdout) {
+            Some(cap) => cap[1].to_string(),
+            None => {
+                eprintln!("⚠️ Window not found.");
+                return "".to_string();
+            }
+        };
+
+        let output = Command::new("xprop")
+            .args(["-id", &window_id])
+            .output()
+            .expect("xprop id run error.");
+
+        let info = String::from_utf8_lossy(&output.stdout);
+        for line in info.lines() {
+            if line.starts_with("WM_CLASS") {
+                let mut matches = NAME_REGEX.captures_iter(line);
+
+                if let Some(app_class) = matches.next() {
+                    let terminal = app_class[1].to_string();
+                    return terminal;
+                }
+            }
+        }
+        return "".to_string();
     }
 
     pub fn get_disks(disk_point: &str) -> String {
