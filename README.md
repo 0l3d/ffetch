@@ -73,6 +73,82 @@ At its core, it works simply and the codebase is easy to understand. 💡
 - `getLocale`  
   Returns your system **locale** (e.g., `en_US`).
 
+# F-Fetch Style ANSI Color Codes Reference
+
+## 🎨 Foreground Colors (Text Colors)
+
+| Placeholder | ANSI Code | Color | Description |
+|-------------|-----------|-------|-------------|
+| `fg.black` | `\x1b[30m` | ⚫ | Black text |
+| `fg.red` | `\x1b[31m` | 🔴 | Red text |
+| `fg.green` | `\x1b[32m` | 🟢 | Green text |
+| `fg.yellow` | `\x1b[33m` | 🟡 | Yellow text |
+| `fg.blue` | `\x1b[34m` | 🔵 | Blue text |
+| `fg.magenta` | `\x1b[35m` | 🟣 | Magenta text |
+| `fg.cyan` | `\x1b[36m` | 🔵 | Cyan text |
+| `fg.white` | `\x1b[37m` | ⚪ | White text |
+
+## ✨ Bright Foreground Colors
+
+| Placeholder | ANSI Code | Color | Description |
+|-------------|-----------|-------|-------------|
+| `fg.bright_black` | `\x1b[90m` | ⚫ | Bright black (gray) text |
+| `fg.bright_red` | `\x1b[91m` | 🔴 | Bright red text |
+| `fg.bright_green` | `\x1b[92m` | 🟢 | Bright green text |
+| `fg.bright_yellow` | `\x1b[93m` | 🟡 | Bright yellow text |
+| `fg.bright_blue` | `\x1b[94m` | 🔵 | Bright blue text |
+| `fg.bright_magenta` | `\x1b[95m` | 🟣 | Bright magenta text |
+| `fg.bright_cyan` | `\x1b[96m` | 🔵 | Bright cyan text |
+| `fg.bright_white` | `\x1b[97m` | ⚪ | Bright white text |
+
+## 🎭 Background Colors
+
+| Placeholder | ANSI Code | Color | Description |
+|-------------|-----------|-------|-------------|
+| `bg.black` | `\x1b[40m` | ⚫ | Black background |
+| `bg.red` | `\x1b[41m` | 🔴 | Red background |
+| `bg.green` | `\x1b[42m` | 🟢 | Green background |
+| `bg.yellow` | `\x1b[43m` | 🟡 | Yellow background |
+| `bg.blue` | `\x1b[44m` | 🔵 | Blue background |
+| `bg.magenta` | `\x1b[45m` | 🟣 | Magenta background |
+| `bg.cyan` | `\x1b[46m` | 🔵 | Cyan background |
+| `bg.white` | `\x1b[47m` | ⚪ | White background |
+
+## 🌟 Bright Background Colors
+
+| Placeholder | ANSI Code | Color | Description |
+|-------------|-----------|-------|-------------|
+| `bg.bright_black` | `\x1b[100m` | ⚫ | Bright black (gray) background |
+| `bg.bright_red` | `\x1b[101m` | 🔴 | Bright red background |
+| `bg.bright_green` | `\x1b[102m` | 🟢 | Bright green background |
+| `bg.bright_yellow` | `\x1b[103m` | 🟡 | Bright yellow background |
+| `bg.bright_blue` | `\x1b[104m` | 🔵 | Bright blue background |
+| `bg.bright_magenta` | `\x1b[105m` | 🟣 | Bright magenta background |
+| `bg.bright_cyan` | `\x1b[106m` | 🔵 | Bright cyan background |
+| `bg.bright_white` | `\x1b[107m` | ⚪ | Bright white background |
+
+## 📝 Text Styles
+
+| Placeholder | ANSI Code | Style | Description |
+|-------------|-----------|-------|-------------|
+| `t.bold` | `\x1b[1m` | **Bold** | Make text bold |
+| `t.dim` | `\x1b[2m` | Dim | Make text dimmed |
+| `t.italic` | `\x1b[3m` | *Italic* | Make text italic |
+| `t.underline` | `\x1b[4m` | <u>Underline</u> | Underline text |
+| `t.inverse` | `\x1b[7m` | Inverse | Swap foreground/background |
+| `t.hidden` | `\x1b[8m` | Hidden | Hide text |
+| `t.strike` | `\x1b[9m` | ~~Strike~~ | Strike through text |
+| `t.bold_off` | `\x1b[21m` | Normal | Turn off bold |
+| `t.underline_off` | `\x1b[24m` | Normal | Turn off underline |
+| `t.inverse_off` | `\x1b[27m` | Normal | Turn off inverse |
+
+## 🔄 Reset
+
+| Placeholder | ANSI Code | Function | Description |
+|-------------|-----------|----------|-------------|
+| `all.reset` | `\x1b[0m` | Reset | Reset all formatting |
+
+---
 
 
 ---

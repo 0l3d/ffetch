@@ -6,7 +6,14 @@ use once_cell::sync::Lazy;
 use regex::Regex;
 
 fn read_lines(filename: &str) -> Vec<String> {
-    if !Path::new(filename).exists() {
+    let conf_path = Path::new(filename);
+    if !conf_path.exists() {
+        if let Some(parent) = conf_path.parent() {
+            if !parent.exists() {
+                fs::create_dir_all(parent).expect("Parent directory create error.");
+            }
+        }
+
         let mut file = fs::File::create(filename).expect("file create error.");
         let content = r#"
            #####
@@ -62,7 +69,14 @@ lazy_static! {
 }
 
 static CONTENTS: Lazy<Vec<String>> = Lazy::new(|| {
-    if !Path::new(&*PATH).exists() {
+    let conf_path = Path::new(&*PATH);
+    if !conf_path.exists() {
+        if let Some(parent) = conf_path.parent() {
+            if !parent.exists() {
+                println!("{:?}", parent);
+                fs::create_dir_all(parent).expect("Parent directory create error.");
+            }
+        }
         let mut file = fs::File::create(&*PATH).expect("file create error.");
         let content = r#"
 # middle config
