@@ -155,9 +155,15 @@ pub mod ffetch {
     }
 
     pub fn get_gpu() -> String {
-        let output = Command::new("lspci")
-            .output()
-            .expect("Failed to execute lspci, not found.");
+        if !is_lspci_available() {
+            return "lspci not available".to_string();
+        }
+
+        let output = match Command::new("lspci").output() {
+            Ok(output) => output,
+            Err(_) => return "Failed to execute lspci".to_string(),
+        };
+
         let lspci_output = String::from_utf8_lossy(&output.stdout);
 
         for line in lspci_output.lines() {
@@ -209,18 +215,32 @@ pub mod ffetch {
                     }
                     return gpu_name.to_string();
                 }
+
+                let end = full.find("(rev").unwrap_or(full.len());
+                return full[..end].trim().to_string();
             }
         }
         "GPU not found".to_string()
     }
 
     pub fn get_m_gpu() -> String {
-        let output = Command::new("lspci")
-            .output()
-            .expect("Failed to execute lspci, not found.");
+        if !is_lspci_available() {
+            return "lspci not available".to_string();
+        }
+
+        let output = match Command::new("lspci").output() {
+            Ok(output) => output,
+            Err(_) => return "Failed to execute lspci".to_string(),
+        };
+
         let lspci_output = String::from_utf8_lossy(&output.stdout);
+        let mut primary_gpu_line = String::new();
 
         for line in lspci_output.lines() {
+            if line.contains("VGA compatible controller:") {
+                primary_gpu_line = line.to_string();
+            }
+
             if line.contains("3D controller:") {
                 if let Some(idx) = line.find("3D controller:") {
                     let full = &line[idx + "3D controller:".len()..].trim();
@@ -270,7 +290,73 @@ pub mod ffetch {
                 }
             }
         }
+
+        for line in lspci_output.lines() {
+            if line.contains("VGA compatible controller:") && line != &primary_gpu_line {
+                if let Some(idx) = line.find("VGA compatible controller:") {
+                    let full = &line[idx + "VGA compatible controller: ".len()..];
+
+                    if full.contains("NVIDIA") {
+                        if let Some(start) = full.find("GeForce") {
+                            let end = full
+                                .find("] (rev")
+                                .or_else(|| full.find("(rev"))
+                                .unwrap_or(full.len());
+                            return format!("NVIDIA {}", full[start..end].trim());
+                        } else if let Some(start) = full.find("Quadro") {
+                            let end = full
+                                .find("] (rev")
+                                .or_else(|| full.find("(rev"))
+                                .unwrap_or(full.len());
+                            return format!("NVIDIA {}", full[start..end].trim());
+                        } else {
+                            let end = full.find("(rev").unwrap_or(full.len());
+                            return format!("NVIDIA {}", full[..end].trim());
+                        }
+                    }
+
+                    if full.contains("AMD") || full.contains("ATI") {
+                        let end = full.find("(rev").unwrap_or(full.len());
+                        let gpu_name = full[..end].trim();
+
+                        if gpu_name.starts_with("Advanced Micro Devices") {
+                            return gpu_name
+                                .replace("Advanced Micro Devices, Inc. [", "AMD ")
+                                .replace("]", "")
+                                .trim()
+                                .to_string();
+                        }
+                        return gpu_name.to_string();
+                    }
+
+                    if full.contains("Intel") {
+                        let end = full.find("(rev").unwrap_or(full.len());
+                        let gpu_name = full[..end].trim();
+
+                        if gpu_name.starts_with("Intel Corporation") {
+                            return gpu_name
+                                .replace("Intel Corporation ", "Intel ")
+                                .trim()
+                                .to_string();
+                        }
+                        return gpu_name.to_string();
+                    }
+
+                    let end = full.find("(rev").unwrap_or(full.len());
+                    return full[..end].trim().to_string();
+                }
+            }
+        }
+
         "Mobile GPU not found".to_string()
+    }
+
+    fn is_lspci_available() -> bool {
+        Command::new("which")
+            .arg("lspci")
+            .output()
+            .map(|output| output.status.success())
+            .unwrap_or(false)
     }
 
     pub fn get_shell() -> String {
