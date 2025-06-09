@@ -234,11 +234,11 @@ pub mod ffetch {
         };
 
         let lspci_output = String::from_utf8_lossy(&output.stdout);
-        let mut primary_gpu_line = String::new();
+        let mut vga_lines = Vec::new();
 
         for line in lspci_output.lines() {
             if line.contains("VGA compatible controller:") {
-                primary_gpu_line = line.to_string();
+                vga_lines.push(line.to_string());
             }
 
             if line.contains("3D controller:") {
@@ -291,60 +291,59 @@ pub mod ffetch {
             }
         }
 
-        for line in lspci_output.lines() {
-            if line.contains("VGA compatible controller:") && line != &primary_gpu_line {
-                if let Some(idx) = line.find("VGA compatible controller:") {
-                    let full = &line[idx + "VGA compatible controller: ".len()..];
+        if vga_lines.len() > 1 {
+            let second_vga = &vga_lines[1];
+            if let Some(idx) = second_vga.find("VGA compatible controller:") {
+                let full = &second_vga[idx + "VGA compatible controller: ".len()..];
 
-                    if full.contains("NVIDIA") {
-                        if let Some(start) = full.find("GeForce") {
-                            let end = full
-                                .find("] (rev")
-                                .or_else(|| full.find("(rev"))
-                                .unwrap_or(full.len());
-                            return format!("NVIDIA {}", full[start..end].trim());
-                        } else if let Some(start) = full.find("Quadro") {
-                            let end = full
-                                .find("] (rev")
-                                .or_else(|| full.find("(rev"))
-                                .unwrap_or(full.len());
-                            return format!("NVIDIA {}", full[start..end].trim());
-                        } else {
-                            let end = full.find("(rev").unwrap_or(full.len());
-                            return format!("NVIDIA {}", full[..end].trim());
-                        }
-                    }
-
-                    if full.contains("AMD") || full.contains("ATI") {
+                if full.contains("NVIDIA") {
+                    if let Some(start) = full.find("GeForce") {
+                        let end = full
+                            .find("] (rev")
+                            .or_else(|| full.find("(rev"))
+                            .unwrap_or(full.len());
+                        return format!("NVIDIA {}", full[start..end].trim());
+                    } else if let Some(start) = full.find("Quadro") {
+                        let end = full
+                            .find("] (rev")
+                            .or_else(|| full.find("(rev"))
+                            .unwrap_or(full.len());
+                        return format!("NVIDIA {}", full[start..end].trim());
+                    } else {
                         let end = full.find("(rev").unwrap_or(full.len());
-                        let gpu_name = full[..end].trim();
-
-                        if gpu_name.starts_with("Advanced Micro Devices") {
-                            return gpu_name
-                                .replace("Advanced Micro Devices, Inc. [", "AMD ")
-                                .replace("]", "")
-                                .trim()
-                                .to_string();
-                        }
-                        return gpu_name.to_string();
+                        return format!("NVIDIA {}", full[..end].trim());
                     }
-
-                    if full.contains("Intel") {
-                        let end = full.find("(rev").unwrap_or(full.len());
-                        let gpu_name = full[..end].trim();
-
-                        if gpu_name.starts_with("Intel Corporation") {
-                            return gpu_name
-                                .replace("Intel Corporation ", "Intel ")
-                                .trim()
-                                .to_string();
-                        }
-                        return gpu_name.to_string();
-                    }
-
-                    let end = full.find("(rev").unwrap_or(full.len());
-                    return full[..end].trim().to_string();
                 }
+
+                if full.contains("AMD") || full.contains("ATI") {
+                    let end = full.find("(rev").unwrap_or(full.len());
+                    let gpu_name = full[..end].trim();
+
+                    if gpu_name.starts_with("Advanced Micro Devices") {
+                        return gpu_name
+                            .replace("Advanced Micro Devices, Inc. [", "AMD ")
+                            .replace("]", "")
+                            .trim()
+                            .to_string();
+                    }
+                    return gpu_name.to_string();
+                }
+
+                if full.contains("Intel") {
+                    let end = full.find("(rev").unwrap_or(full.len());
+                    let gpu_name = full[..end].trim();
+
+                    if gpu_name.starts_with("Intel Corporation") {
+                        return gpu_name
+                            .replace("Intel Corporation ", "Intel ")
+                            .trim()
+                            .to_string();
+                    }
+                    return gpu_name.to_string();
+                }
+
+                let end = full.find("(rev").unwrap_or(full.len());
+                return full[..end].trim().to_string();
             }
         }
 
