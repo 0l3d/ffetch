@@ -150,32 +150,64 @@ pub mod ffetch {
 
         res.join(" ")
     }
+
     pub fn get_gpu() -> String {
         let output = Command::new("lspci")
             .output()
             .expect("Failed to execute lspci, not found.");
-
         let lspci_output = String::from_utf8_lossy(&output.stdout);
 
         for line in lspci_output.lines() {
             if let Some(idx) = line.find("VGA compatible controller:") {
                 let full = &line[idx + "VGA compatible controller: ".len()..];
+
                 if full.contains("NVIDIA") {
                     if let Some(start) = full.find("GeForce") {
-                        let end = full.find("] (rev").unwrap_or(full.len());
+                        let end = full
+                            .find("] (rev")
+                            .or_else(|| full.find("(rev"))
+                            .unwrap_or(full.len());
+                        return format!("NVIDIA {}", full[start..end].trim());
+                    } else if let Some(start) = full.find("Quadro") {
+                        let end = full
+                            .find("] (rev")
+                            .or_else(|| full.find("(rev"))
+                            .unwrap_or(full.len());
                         return format!("NVIDIA {}", full[start..end].trim());
                     } else {
-                        return format!("NVIDIA {}", full.trim());
+                        let end = full.find("(rev").unwrap_or(full.len());
+                        return format!("NVIDIA {}", full[..end].trim());
                     }
                 }
 
-                if full.contains("AMD") {
+                if full.contains("AMD") || full.contains("ATI") {
                     let end = full.find("(rev").unwrap_or(full.len());
-                    return full[..end].trim().to_string();
+                    let gpu_name = full[..end].trim();
+
+                    if gpu_name.starts_with("Advanced Micro Devices") {
+                        return gpu_name
+                            .replace("Advanced Micro Devices, Inc. [", "AMD ")
+                            .replace("]", "")
+                            .trim()
+                            .to_string();
+                    }
+                    return gpu_name.to_string();
+                }
+
+                if full.contains("Intel") {
+                    let end = full.find("(rev").unwrap_or(full.len());
+                    let gpu_name = full[..end].trim();
+
+                    if gpu_name.starts_with("Intel Corporation") {
+                        return gpu_name
+                            .replace("Intel Corporation ", "Intel ")
+                            .trim()
+                            .to_string();
+                    }
+                    return gpu_name.to_string();
                 }
             }
         }
-
         "GPU not found".to_string()
     }
 
@@ -183,17 +215,58 @@ pub mod ffetch {
         let output = Command::new("lspci")
             .output()
             .expect("Failed to execute lspci, not found.");
-
         let lspci_output = String::from_utf8_lossy(&output.stdout);
 
         for line in lspci_output.lines() {
             if line.contains("3D controller:") {
                 if let Some(idx) = line.find("3D controller:") {
-                    return line[idx + "3D controller:".len()..].trim().to_string();
+                    let full = &line[idx + "3D controller:".len()..].trim();
+
+                    if full.contains("NVIDIA") {
+                        if let Some(start) = full.find("GeForce") {
+                            let end = full
+                                .find("] (rev")
+                                .or_else(|| full.find("(rev"))
+                                .unwrap_or(full.len());
+                            return format!("NVIDIA {}", full[start..end].trim());
+                        } else {
+                            let end = full.find("(rev").unwrap_or(full.len());
+                            return format!("NVIDIA {}", full[..end].trim());
+                        }
+                    }
+
+                    if full.contains("AMD") || full.contains("ATI") {
+                        let end = full.find("(rev").unwrap_or(full.len());
+                        let gpu_name = full[..end].trim();
+
+                        if gpu_name.starts_with("Advanced Micro Devices") {
+                            return gpu_name
+                                .replace("Advanced Micro Devices, Inc. [", "AMD ")
+                                .replace("]", "")
+                                .trim()
+                                .to_string();
+                        }
+                        return gpu_name.to_string();
+                    }
+
+                    if full.contains("Intel") {
+                        let end = full.find("(rev").unwrap_or(full.len());
+                        let gpu_name = full[..end].trim();
+
+                        if gpu_name.starts_with("Intel Corporation") {
+                            return gpu_name
+                                .replace("Intel Corporation ", "Intel ")
+                                .trim()
+                                .to_string();
+                        }
+                        return gpu_name.to_string();
+                    }
+
+                    let end = full.find("(rev").unwrap_or(full.len());
+                    return full[..end].trim().to_string();
                 }
             }
         }
-
         "Mobile GPU not found".to_string()
     }
 
