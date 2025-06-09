@@ -1,4 +1,4 @@
-# [0.2.2] 
+# [0.2.4] 
 
 ### What's Changed?
-- Added non-config Mode
+- Fixed some bugs
