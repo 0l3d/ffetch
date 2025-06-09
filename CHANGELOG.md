@@ -1,4 +1,4 @@
-# [0.2.5] 
+# [0.2.6] 
 
 ### What's Changed?
-- Added getTerm
+- Added little wayland support for getTerm

@@ -327,7 +327,7 @@ pub mod ffetch {
                 }
             }
         }
-        return "".to_string();
+        return env::var("TERM").unwrap_or_else(|_| "Unknown".to_string());
     }
 
     pub fn get_disks(disk_point: &str) -> String {
