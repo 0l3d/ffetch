@@ -67,16 +67,16 @@ case "$install_choice" in
     fi
 
     echo "Download URL: $DOWNLOAD_URL"
+    
+    mkdir -p "$DIR"
+    cd "$DIR"
     curl -L "$DOWNLOAD_URL" -o ffetch.tar.gz
     tar -xzf ffetch.tar.gz
     chmod +x ffetch
     BINARY_PATH="$(pwd)/ffetch"
     echo "Download complete: $BINARY_PATH"
     rm ffetch.tar.gz
-
-    if [ ! -d "$DIR" ]; then
-      git clone "$REPO" "$DIR"
-    fi
+    cd ..
     ;;
 
   3)
@@ -90,12 +90,16 @@ case "$install_choice" in
     fi
 
     echo "Download URL: $DOWNLOAD_URL"
+    
+    mkdir -p "$DIR"
+    cd "$DIR"
     curl -L "$DOWNLOAD_URL" -o ffetch.tar.gz
     tar -xzf ffetch.tar.gz
     chmod +x ffetch
     BINARY_PATH="$(pwd)/ffetch"
     echo "Update complete: $BINARY_PATH"
     rm ffetch.tar.gz
+    cd ..
     ;;
 
   s|S)
@@ -128,20 +132,34 @@ if [ "$install_choice" = "1" ] || [ "$install_choice" = "2" ]; then
   read config_choice
 
   case "$config_choice" in
-    1) CONFIG_FILE="ffetch-advanced.conf" ;;
-    2) CONFIG_FILE="ffetch-middle.conf" ;;
-    3) CONFIG_FILE="ffetch-minimal.conf" ;;
-    s|S) CONFIG_FILE="" ;;
-    *) CONFIG_FILE="ffetch-middle.conf" ;;
+    1) 
+      CONFIG_URL="https://raw.githubusercontent.com/0l3d/ffetch/refs/heads/master/ffetch-advanced.conf"
+      CONFIG_NAME="Advanced"
+      ;;
+    2) 
+      CONFIG_URL="https://raw.githubusercontent.com/0l3d/ffetch/refs/heads/master/ffetch-middle.conf"
+      CONFIG_NAME="Middle"
+      ;;
+    3) 
+      CONFIG_URL="https://raw.githubusercontent.com/0l3d/ffetch/refs/heads/master/ffetch-minimal.conf"
+      CONFIG_NAME="Minimal"
+      ;;
+    s|S) 
+      CONFIG_URL=""
+      CONFIG_NAME=""
+      ;;
+    *) 
+      CONFIG_URL="https://raw.githubusercontent.com/0l3d/ffetch/refs/heads/master/ffetch-middle.conf"
+      CONFIG_NAME="Middle (default)"
+      ;;
   esac
 
-  if [ -n "$CONFIG_FILE" ]; then
-    if [ -f "$CONFIG_FILE" ]; then
-      cp "$CONFIG_FILE" ~/.config/ffetch/ffetch.conf
-    elif [ -f "$DIR/$CONFIG_FILE" ]; then
-      cp "$DIR/$CONFIG_FILE" ~/.config/ffetch/ffetch.conf
+  if [ -n "$CONFIG_URL" ]; then
+    echo "Downloading $CONFIG_NAME configuration..."
+    if curl -s -L "$CONFIG_URL" -o ~/.config/ffetch/ffetch.conf; then
+      echo "$CONFIG_NAME configuration saved to ~/.config/ffetch/ffetch.conf"
     else
-      echo "Warning: Configuration file not found"
+      echo "Warning: Failed to download configuration file"
     fi
   else
     echo "Skipping configuration setup."
@@ -174,24 +192,49 @@ if [ "$install_choice" = "1" ] || [ "$install_choice" = "2" ]; then
 fi
 
 echo ""
-echo -n "Move ffetch binary to /usr/local/bin or specify path? (default: /usr/local/bin) [y/N/path]: "
-read move_binary
+echo "Installation path options:"
+echo "1) Install to $DEFAULT_INSTALL_PATH (default)"
+echo "2) Specify custom path"
+echo "3) Keep binary in current location"
+echo -n "Choice [1-3]: "
+read install_path_choice
 
-case "$move_binary" in
-  [Yy]*)
-    sudo cp "$BINARY_PATH" "$DEFAULT_INSTALL_PATH/ffetch"
-    echo "ffetch moved to $DEFAULT_INSTALL_PATH/"
-    echo "You can now run: ffetch"
+case "$install_path_choice" in
+  1|"")
+    if sudo cp "$BINARY_PATH" "$DEFAULT_INSTALL_PATH/ffetch"; then
+      echo "ffetch installed to $DEFAULT_INSTALL_PATH/"
+      echo "You can now run: ffetch"
+      rm -rf "$DIR"
+      echo "Cleaned up temporary directory: $DIR"
+    else
+      echo "Failed to install ffetch to $DEFAULT_INSTALL_PATH"
+      echo "Binary remains at: $BINARY_PATH"
+    fi
     ;;
-  /*)
-    sudo cp "$BINARY_PATH" "$move_binary/ffetch"
-    echo "ffetch moved to $move_binary/"
-    echo "You can now run: ffetch"
+  2)
+    echo -n "Enter installation path (e.g., /usr/bin): "
+    read custom_path
+    if [ -n "$custom_path" ] && [ -d "$custom_path" ]; then
+      if sudo cp "$BINARY_PATH" "$custom_path/ffetch"; then
+        echo "ffetch installed to $custom_path/"
+        echo "You can now run: ffetch"
+        rm -rf "$DIR"
+        echo "Cleaned up temporary directory: $DIR"
+      else
+        echo "Failed to install ffetch to $custom_path"
+        echo "Binary remains at: $BINARY_PATH"
+      fi
+    else
+      echo "Invalid path or directory does not exist"
+      echo "Binary remains at: $BINARY_PATH"
+    fi
     ;;
-  *)
+  3)
     echo "Installation complete!"
     echo "Binary location: $BINARY_PATH"
-    echo "To move manually: sudo cp $BINARY_PATH /usr/local/bin/"
+    echo "To install manually later: sudo cp $BINARY_PATH /usr/local/bin/"
+    ;;
+  *)
+    echo "Invalid choice. Binary remains at: $BINARY_PATH"
     ;;
 esac
-
