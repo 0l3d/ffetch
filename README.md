@@ -148,8 +148,6 @@ At its core, it works simply and the codebase is easy to understand. 💡
 |-------------|-----------|----------|-------------|
 | `all.reset` | `\x1b[0m` | Reset | Reset all formatting |
 
----
-
 
 ---
 # 🛠️ **F-Fetch Configuration Examples**  

@@ -1,5 +1,4 @@
-# [0.2.1] 
+# [0.2.2] 
 
 ### What's Changed?
-- Added some smart functions.
-- Improved skills of installation script.
+- Added non-config Mode
