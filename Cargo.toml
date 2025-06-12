@@ -30,11 +30,6 @@ strip = "symbols"
 # ADD DEB AND RPM PACKAGING.
 
 [dependencies]
-directories = "5.0.1"
-sysinfo = "0.35.1"
-whoami = "1.4.1"
-rsbash = "2.1.0"
-termion = "2.0.1"
 regex = "1.11.1"
 lazy_static = "1.5.0"
 once_cell = "1.21.3"

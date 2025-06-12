@@ -2,12 +2,8 @@ pub mod ffetch {
     use display_info::DisplayInfo;
     use lazy_static::lazy_static;
     use regex::Regex;
-    use rsbash::rash;
-    use std::env;
-    use std::{fs::read_to_string, process::Command};
-    use sysinfo::{Disks};
+    use std::{env,fs::read_to_string, process::Command};
     use which::which;
-    use whoami;
     
     lazy_static! {
         static ref DISPLAY_INFORMATION: Vec<DisplayInfo> = DisplayInfo::all().unwrap();
@@ -35,7 +31,7 @@ pub mod ffetch {
     }
 
     pub fn get_username() -> String {
-        whoami::username()
+        env::var("USER").or_else(|_| env::var("USERNAME")).unwrap_or_else(|_| "User not found".to_string())
     }
 
     pub fn get_cpu_name() -> String {
@@ -134,7 +130,7 @@ pub mod ffetch {
     }
 
     pub fn get_platform() -> String {
-        whoami::platform().to_string()
+        "Linux".to_string()
     }
 
     pub fn get_uptime() -> String {
@@ -386,8 +382,7 @@ pub mod ffetch {
     }
 
     pub fn get_shell() -> String {
-        let shell_command = rash!("echo $SHELL").expect("error rash command for shell");
-        shell_command.1.split("\n").collect()
+	env::var("SHELL").unwrap_or_else(|_| "Unknown Shell".to_string())
     }
     pub fn get_monitor(monitor_index: usize) -> String {
         let mut trues = "";
@@ -441,7 +436,7 @@ pub mod ffetch {
         }
         return env::var("TERM").unwrap_or_else(|_| "Unknown".to_string());
     }
-
+    /* OLD CODE
     pub fn get_disks(disk_point: &str) -> String {
         let disks = Disks::new_with_refreshed_list();
         for disk in disks.list() {
@@ -454,5 +449,22 @@ pub mod ffetch {
             }
         }
         String::new()
+} */
+
+    pub fn get_disks(mountpoint: &str) -> String {
+	// 0 disk | 1 size | 2 used | 3 avail | 4 use percent | 5 mountpoint
+	let dfh = Command::new("df")
+	    .arg("-h")
+	    .output()
+	    .expect("df -h command error");
+	let info = String::from_utf8_lossy(&dfh.stdout);
+	for line in info.lines() {
+	    let info_split: Vec<_> = line.split_whitespace().collect();
+	    if info_split[5] == mountpoint {
+		let info_split_format = format!("{}  / {} ({})", info_split[2], info_split[1], info_split[4]);
+		return info_split_format;
+	    }
+	}
+	"".to_string()
     }
 }
