@@ -5,10 +5,10 @@ pub mod ffetch {
     use rsbash::rash;
     use std::env;
     use std::{fs::read_to_string, process::Command};
-    use sysinfo::{Disks, System};
+    use sysinfo::{Disks};
     use which::which;
     use whoami;
-
+    
     lazy_static! {
         static ref DISPLAY_INFORMATION: Vec<DisplayInfo> = DisplayInfo::all().unwrap();
         static ref REGEX: Regex = Regex::new(r"window id # (0x[0-9a-f]+)").unwrap();
@@ -17,7 +17,6 @@ pub mod ffetch {
 
     pub fn get_kernel_version() -> String {
         let mut kernel_result: Vec<String> = Vec::new();
-
         for line in read_to_string("/proc/version")
             .expect("you are not using linux (/proc/version is empty)")
             .lines()
@@ -26,7 +25,6 @@ pub mod ffetch {
         }
 
         let kernel_result_full: Vec<_> = kernel_result[0].split(" ").collect();
-
         kernel_result_full[2].to_string()
     }
 
@@ -53,7 +51,9 @@ pub mod ffetch {
 
         result_full.to_string()
     }
+    /*
 
+    Old Code
     pub fn get_memory() -> String {
         let mut sys = System::new();
         sys.refresh_memory();
@@ -62,7 +62,34 @@ pub mod ffetch {
 
         format!("{} / {}", used_memory, total_memory)
     }
-
+     */
+    
+    pub fn get_memory() -> String {
+	let mut total_memory : u64 = 0;
+	let mut free_memory : u64 = 0;
+	for line in read_to_string("/proc/meminfo").expect("meminfo read error").lines() {
+	    let spline : Vec<&str> = line.split(":").collect();
+	    match spline[0] {
+		"MemTotal" => {
+    		    let total_memory_split : Vec<_>= spline[1].split("kB").collect();
+		    let total_memory_trim = total_memory_split[0].trim();
+		    let _total_memory_asint : u64 = total_memory_trim.parse().unwrap();
+		    total_memory = _total_memory_asint / 1024;
+		}
+		"MemAvailable" => {
+		    let free_memory_split : Vec<_> = spline[1].split("kB").collect();
+		    let free_memory_trim = free_memory_split[0].trim();
+		    let _free_memory_asint : u64 = free_memory_trim.parse().unwrap();
+		    free_memory = _free_memory_asint / 1024;
+		}
+		_ => {}
+	    }
+	}
+	let memory_usage = total_memory - free_memory;
+	return format!("{} / {}", memory_usage, total_memory);
+    }
+    
+    
     pub fn get_os_name() -> String {
         let mut osname_result: Vec<String> = Vec::new();
 
