@@ -47,25 +47,27 @@ lazy_static! {
     static ref DISK_REGEX: Regex = Regex::new(r"getDisk\((.*?)\)").expect("Regex error:");
     static ref MON_REGEX: Regex = Regex::new(r"getMonitor\((.*?)\)").expect("Regex error:");
     static ref PKG_REGEX: Regex = Regex::new(r"getPackages\((.*?)\)").expect("Regex error:");
-    static ref USERNAME: String = ffetch::ffetch::get_username();
-    static ref TERMINAL: String = ffetch::ffetch::get_terminal();
-    static ref KERNEL: String = ffetch::ffetch::get_kernel_version();
-    static ref CPU: String = ffetch::ffetch::get_cpu_name();
-    static ref MEMORY: String = ffetch::ffetch::get_memory();
-    static ref HOSTNAME: String = ffetch::ffetch::get_hostname();
-    static ref OSNAME: String = ffetch::ffetch::get_os_name();
-    static ref DESKTOP: String = ffetch::ffetch::get_desktop_env();
-    static ref LOCALE: String = ffetch::ffetch::get_locale();
-    static ref ARCH: String = ffetch::ffetch::get_cpu_arch();
-    static ref PLATFORM: String = ffetch::ffetch::get_platform();
-    static ref UPTIME: String = ffetch::ffetch::get_uptime();
-    static ref SHELL: String = ffetch::ffetch::get_shell();
-    static ref PACKAGES: String = ffetch::ffetch::get_packages();
-    static ref GPU: String = ffetch::ffetch::get_gpu();
-    static ref mGPU: String = ffetch::ffetch::get_m_gpu();
+    static ref USERNAME: String = ffetch::get_username();
+    static ref TERMINAL: String = ffetch::get_terminal();
+    static ref KERNEL: String = ffetch::get_kernel_version();
+    static ref CPU: String = ffetch::get_cpu_name();
+    static ref MEMORY: String = ffetch::get_memory();
+    static ref HOSTNAME: String = ffetch::get_hostname();
+    static ref OSNAME: String = ffetch::get_os_name();
+    static ref DESKTOP: String = ffetch::get_desktop_env();
+    static ref LOCALE: String = ffetch::get_locale();
+    static ref ARCH: String = ffetch::get_cpu_arch();
+    static ref PLATFORM: String = ffetch::get_platform();
+    static ref UPTIME: String =  ffetch::get_uptime();
+    static ref SHELL: String = ffetch::get_shell();
+    static ref PACKAGES: String = ffetch::get_packages();
+    static ref GPU: String = ffetch::get_gpu();
+    static ref mGPU: String = ffetch::get_m_gpu();
+    static ref GTK: String = ffetch::gtk_theme();
+    static ref QT: String = ffetch::qt_theme();
     static ref PATH: String = format!(
         "/home/{}/.config/ffetch/ffetch.conf",
-        ffetch::ffetch::get_username()
+        ffetch::get_username()
     );
 }
 
@@ -124,9 +126,9 @@ fn comp_with_mon_argument(input: &str) -> usize {
 }
 
 fn find_token(string: &str, findstr: &str) -> bool {
-    let tokens: &Vec<&str> = &string.split(" ").collect();
-    for i in 0..tokens.len() {
-        if tokens[i] == findstr {
+    let tokens : Vec<&str> = string.split(" ").collect();
+    for item in &tokens {
+        if item == &findstr {
             return true;
         }
     }
@@ -160,8 +162,10 @@ fn replace_syntax(conf: &str) -> String {
         .replace("getShell", &SHELL)
         .replace("getLocale", &LOCALE)
         .replace("getTerm", &TERMINAL)
-        .replace(&diskf, &ffetch::ffetch::get_disks(&disk))
-        .replace(&monitorf, &ffetch::ffetch::get_monitor(index))
+        .replace("getGTK", &GTK)
+        .replace("getQT", &QT)
+        .replace(&diskf, &ffetch::get_disks(&disk))
+        .replace(&monitorf, &ffetch::get_monitor(index))
         // Fg Colors
         .replace("fg.black", "\x1b[30m")
         .replace("fg.red", "\x1b[31m")
@@ -230,7 +234,7 @@ fn get_option(token: &str) -> String {
             let tokena: &Vec<&str> = &tokenizer[0].split(" ").collect();
             if tokena[0] == token && find_char(tokens, '"') {
                 let mut newsplt: String = String::new();
-                for tk in 1..tokenizer.len() {
+                if let Some(tk) = (1..tokenizer.len()).next() {
                     newsplt += tokenizer[tk];
                     output = newsplt.split('"').collect();
                     output.replace_range(0..1, "");
@@ -247,8 +251,8 @@ fn get_option(token: &str) -> String {
 
 fn lex_config(input: &str) -> String {
     let input = input.trim_start();
-    let input = if input.starts_with("echo ") {
-        input[5..].trim_start()
+    let input = if let Some(strip) = input.strip_prefix("echo ") {
+        strip.trim_start()
     } else {
         input
     };

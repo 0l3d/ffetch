@@ -1,4 +1,5 @@
-# [0.2.7] 
+# [0.2.10] 
 
 ### What's Changed?
-- getMGpu fixed.
+- getGTK and getQT added (taking informations from environment variables)
+- Some code optimizations and syntax optimizations.
