@@ -16,7 +16,8 @@ At its core, it works simply and the codebase is easy to understand. 💡
 
 ---
 
-![image](https://github.com/user-attachments/assets/acc883e8-abe3-4cf8-838d-68425747939d)
+![voidimage](https://github.com/user-attachments/assets/336c3423-4d1b-40c6-92e7-8eb1b0ad0bd2)
+
 
 ---
 
