@@ -1,5 +1,5 @@
-# [0.2.10] 
+# [0.2.11] 
 
 ### What's Changed?
-- getGTK and getQT added (taking informations from environment variables)
-- Some code optimizations and syntax optimizations.
+- Added getBackend for (wayland) or (x11) or (what if) (taking information from XDG_BACKEND env var.)
+

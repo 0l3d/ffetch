@@ -131,6 +131,10 @@ pub fn get_desktop_env() -> String {
         .unwrap_or_else(|_| "Unknown".to_string())
 }
 
+pub fn get_compositor() -> String {
+    env::var("XDG_BACKEND").unwrap_or_else(|_| "Unknown Backend".to_string())
+}
+
 pub fn get_cpu_arch() -> String {
     let get_cpu_arch_command = Command::new("uname")
         .arg("-m")

@@ -56,9 +56,10 @@ lazy_static! {
     static ref OSNAME: String = ffetch::get_os_name();
     static ref DESKTOP: String = ffetch::get_desktop_env();
     static ref LOCALE: String = ffetch::get_locale();
+    static ref BACKEND: String = ffetch::get_compositor();
     static ref ARCH: String = ffetch::get_cpu_arch();
     static ref PLATFORM: String = ffetch::get_platform();
-    static ref UPTIME: String =  ffetch::get_uptime();
+    static ref UPTIME: String = ffetch::get_uptime();
     static ref SHELL: String = ffetch::get_shell();
     static ref PACKAGES: String = ffetch::get_packages();
     static ref GPU: String = ffetch::get_gpu();
@@ -126,7 +127,7 @@ fn comp_with_mon_argument(input: &str) -> usize {
 }
 
 fn find_token(string: &str, findstr: &str) -> bool {
-    let tokens : Vec<&str> = string.split(" ").collect();
+    let tokens: Vec<&str> = string.split(" ").collect();
     for item in &tokens {
         if item == &findstr {
             return true;
@@ -154,6 +155,7 @@ fn replace_syntax(conf: &str) -> String {
         .replace("getOsName", &OSNAME)
         .replace("getDesktop", &DESKTOP)
         .replace("getArch", &ARCH)
+        .replace("getBackend", &BACKEND)
         .replace("getPlatform", &PLATFORM)
         .replace("getUptime", &UPTIME)
         .replace("getPackages", &PACKAGES)
@@ -284,6 +286,8 @@ fn lex_config(input: &str) -> String {
 
     result
 }
+
+// fn colorize_ascii(ascii: String) {}
 
 fn write_fetch(ascii: Vec<String>, ascii_color: String) -> String {
     let max_width = ascii.iter().map(|line| line.len()).max().unwrap_or(0);
