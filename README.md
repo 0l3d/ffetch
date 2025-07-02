@@ -18,7 +18,6 @@ At its core, it works simply and the codebase is easy to understand. 💡
 
 ![voidimage](https://github.com/user-attachments/assets/336c3423-4d1b-40c6-92e7-8eb1b0ad0bd2)
 
-
 ---
 
 # F-Fetch Components List
@@ -229,15 +228,60 @@ ascii = "/home/getUsername/.config/ffetch/ascii.txt"
 ascii_color = "fg.cyan"
 
 ```
+
 ---
 # ⚙️ **Installation & Configuration**
 
+## 📦 **Install via Cargo**
+```bash
+# Install from crates.io
+cargo install ffetch
+```
+
+## 🚀 **Installation Script**
 ```bash
 # Run Installation Script
 bash <(curl -s https://raw.githubusercontent.com/0l3d/ffetch/master/install.sh)
+```
 
-# Run F-Fetch:
+## 🏃 **Run F-Fetch**
+```bash
 ffetch
+```
+
+---
+
+# 📚 **Use as Library**
+
+You can also use F-Fetch as a library in your Rust projects:
+
+## 📥 **Add to your project**
+```bash
+cargo add ffetch
+```
+
+Or add to your `Cargo.toml`:
+```toml
+[dependencies]
+ffetch = "0.3.1"
+```
+
+## 🛠️ **Example Usage**
+```rust
+use ffetch::*;
+
+fn main() {
+    // Get system information
+    let username = get_username();
+    let os_name = get_os_name();
+    let cpu_info = get_cpu();
+    let memory = get_memory();
+    
+    println!("User: {}", username);
+    println!("OS: {}", os_name);
+    println!("CPU: {}", cpu_info);
+    println!("Memory: {} MB", memory);
+}
 ```
 ---
 
