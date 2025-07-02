@@ -8,7 +8,7 @@ license = "GPL-3.0-or-later"
 repository = "https://github.com/0l3d/ffetch"
 readme = "README.md"
 keywords = ["system", "fetch", "rust", "terminal", "minimal"]
-categories = ["command-line-utilities", "system-tools", "libraries"]
+categories = ["command-line-utilities", "filesystem", "hardware-support"]
 
 [lib]
 name = "ffetch"
