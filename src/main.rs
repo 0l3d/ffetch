@@ -51,6 +51,7 @@ lazy_static! {
     static ref TERMINAL: String = ffetch::get_terminal();
     static ref KERNEL: String = ffetch::get_kernel_version();
     static ref CPU: String = ffetch::get_cpu_name();
+    static ref INIT: String = ffetch::get_init_system();
     static ref MEMORY: String = ffetch::get_memory();
     static ref HOSTNAME: String = ffetch::get_hostname();
     static ref OSNAME: String = ffetch::get_os_name();
@@ -166,10 +167,11 @@ fn replace_syntax(conf: &str) -> String {
         .replace("getTerm", &TERMINAL)
         .replace("getGTK", &GTK)
         .replace("getQT", &QT)
+	.replace("getInit", &INIT)
         .replace(&diskf, &ffetch::get_disks(&disk))
         .replace(&monitorf, &ffetch::get_monitor(index))
         // Fg Colors
-        .replace("fg.black", "\x1b[30m")
+	.replace("fg.black", "\x1b[30m")
         .replace("fg.red", "\x1b[31m")
         .replace("fg.green", "\x1b[32m")
         .replace("fg.yellow", "\x1b[33m")

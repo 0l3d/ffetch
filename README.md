@@ -75,6 +75,18 @@ At its core, it works simply and the codebase is easy to understand. 💡
 
 - `getLocale`  
   Returns your system **locale** (e.g., `en_US`).
+  
+- `getTerm`  
+  Returns your **terminal emulator**. 
+
+- `getBackend`  
+  Returns your **windowing system**.
+  
+- `getInit`  
+  Returns your system **init** (e.g, `runit-init`).
+
+- `getQT` or `getGTK`  
+  Returns your theme from environment variables.
 
 # F-Fetch Style ANSI Color Codes Reference
 

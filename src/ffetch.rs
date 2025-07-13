@@ -1,7 +1,7 @@
 use display_info::DisplayInfo;
 use lazy_static::lazy_static;
 use regex::Regex;
-use std::{env, fs::read_to_string, process::Command};
+use std::{env, fs::{read_to_string, read_link, metadata}, process::Command};
 use which::which;
 
 lazy_static! {
@@ -44,6 +44,39 @@ pub fn get_kernel_version() -> String {
 
     let kernel_result_full: Vec<_> = kernel_result[0].split(" ").collect();
     kernel_result_full[2].to_string()
+}
+
+/// Gets the system init system
+/// # Returns
+///
+/// Returns a `String` containing the init system name (e.g., "runit-init").
+///
+/// # Panics
+///
+/// A specific panic setting was not added, it could be because it cannot find file if it is panic.
+///
+/// # Examples
+///
+/// ```rust
+/// use ffetch::get_init_system();
+/// let init_system = get_init_system();
+/// println!("Init: {}", init_system);
+/// // Output: Init: runit-init
+/// ```
+pub fn get_init_system() -> String {
+    let path = read_link("/sbin/init").unwrap();
+    let init : &str = path.to_str().unwrap();
+
+    if metadata("/sbin/openrc").is_ok() {
+	return "openrc".to_string();
+    }
+    
+    match init {
+	"runit-init" => "runit".to_string(),
+	"/lib/systemd/systemd" => "systemd".to_string(),
+	_ => init.to_string(),
+    }
+    
 }
 
 /// Gets the system locale from environment variables.
