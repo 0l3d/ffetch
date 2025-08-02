@@ -254,6 +254,9 @@ cargo install ffetch
 ```bash
 # Run Installation Script
 bash <(curl -s https://raw.githubusercontent.com/0l3d/ffetch/master/install.sh)
+
+# For LSH
+runurl bash https://raw.githubusercontent.com/0l3d/ffetch/master/install.sh
 ```
 
 ## 🏃 **Run F-Fetch**
