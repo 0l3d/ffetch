@@ -1,34 +1,37 @@
 use display_info::DisplayInfo;
-use lazy_static::lazy_static;
+use once_cell::sync::Lazy;
 use regex::Regex;
-use std::{env, fs::{read_to_string, read_link, metadata}, process::Command};
+use std::{
+    env,
+    fs::{metadata, read_link, read_to_string},
+    process::Command,
+};
 use which::which;
 
-lazy_static! {
-    static ref DISPLAY_INFORMATION: Vec<DisplayInfo> = DisplayInfo::all().unwrap();
-    static ref REGEX: Regex = Regex::new(r"window id # (0x[0-9a-f]+)").unwrap();
-    static ref NAME_REGEX: Regex = Regex::new(r#""([^"]+)""#).unwrap();
-}
+pub static DISPLAY_INFORMATION: Lazy<Vec<DisplayInfo>> = Lazy::new(|| DisplayInfo::all().unwrap());
 
+pub static REGEX: Lazy<Regex> = Lazy::new(|| Regex::new(r"window id # (0x[0-9a-f]+)").unwrap());
+
+pub static NAME_REGEX: Lazy<Regex> = Lazy::new(|| Regex::new(r#""([^"]+)""#).unwrap());
 
 /// Gets the Linux kernel version from `/proc/version`.
-/// 
+///
 /// This function reads the kernel version information and extracts
 /// the version number (third field after splitting by spaces).
-/// 
+///
 /// # Returns
-/// 
+///
 /// Returns a `String` containing the kernel version (e.g., "6.1.0-18-amd64").
-/// 
+///
 /// # Panics
-/// 
+///
 /// Panics if `/proc/version` cannot be read (non-Linux systems).
-/// 
+///
 /// # Examples
-/// 
+///
 /// ```rust
 /// use ffetch::get_kernel_version;
-/// 
+///
 /// let kernel = get_kernel_version();
 /// println!("Kernel version: {}", kernel);
 /// // Output: Kernel version: 6.1.0-18-amd64
@@ -65,33 +68,32 @@ pub fn get_kernel_version() -> String {
 /// ```
 pub fn get_init_system() -> String {
     let path = read_link("/sbin/init").unwrap();
-    let init : &str = path.to_str().unwrap();
+    let init: &str = path.to_str().unwrap();
 
     if metadata("/sbin/openrc").is_ok() {
-	return "openrc".to_string();
+        return "openrc".to_string();
     }
-    
+
     match init {
-	"runit-init" => "runit".to_string(),
-	"/lib/systemd/systemd" => "systemd".to_string(),
-	_ => init.to_string(),
+        "runit-init" => "runit".to_string(),
+        "/lib/systemd/systemd" => "systemd".to_string(),
+        _ => init.to_string(),
     }
-    
 }
 
 /// Gets the system locale from environment variables.
-/// 
+///
 /// Checks `LC_ALL` first, then `LANG`, and defaults to "C" if neither is set.
-/// 
+///
 /// # Returns
-/// 
+///
 /// Returns a `String` containing the locale (e.g., "en_US.UTF-8").
-/// 
+///
 /// # Examples
-/// 
+///
 /// ```rust
 /// use ffetch::get_locale;
-/// 
+///
 /// let locale = get_locale();
 /// println!("System locale: {}", locale);
 /// // Output: System locale: en_US.UTF-8
@@ -103,18 +105,18 @@ pub fn get_locale() -> String {
 }
 
 /// Gets the current username from environment variables.
-/// 
+///
 /// Checks `USER` first, then `USERNAME`, and defaults to "User not found" if neither is set.
-/// 
+///
 /// # Returns
-/// 
+///
 /// Returns a `String` containing the username.
-/// 
+///
 /// # Examples
-/// 
+///
 /// ```rust
 /// use ffetch::get_username;
-/// 
+///
 /// let username = get_username();
 /// println!("Current user: {}", username);
 /// // Output: Current user: john
@@ -125,18 +127,17 @@ pub fn get_username() -> String {
         .unwrap_or_else(|_| "User not found".to_string())
 }
 
-
 /// Gets the GTK theme from the `GTK_THEME` environment variable.
-/// 
+///
 /// # Returns
-/// 
+///
 /// Returns a `String` containing the GTK theme name or an error message if not set.
-/// 
+///
 /// # Examples
-/// 
+///
 /// ```rust
 /// use ffetch::gtk_theme;
-/// 
+///
 /// let theme = gtk_theme();
 /// println!("GTK Theme: {}", theme);
 /// // Output: GTK Theme: Adwaita:dark
@@ -145,18 +146,17 @@ pub fn gtk_theme() -> String {
     env::var("GTK_THEME").unwrap_or_else(|_| "GTK_THEME variable is not setting up".to_string())
 }
 
-
 /// Gets the Qt platform theme from the `QT_QPA_PLATFORMTHEME` environment variable.
-/// 
+///
 /// # Returns
-/// 
+///
 /// Returns a `String` containing the Qt theme name or an error message if not set.
-/// 
+///
 /// # Examples
-/// 
+///
 /// ```rust
 /// use ffetch::qt_theme;
-/// 
+///
 /// let theme = qt_theme();
 /// println!("Qt Theme: {}", theme);
 /// // Output: Qt Theme: gtk2
@@ -166,24 +166,23 @@ pub fn qt_theme() -> String {
         .unwrap_or_else(|_| "QT_QPA_PLATFORMTHEME variable is not setting up".to_string())
 }
 
-
 /// Gets the CPU name from `/proc/cpuinfo`.
-/// 
+///
 /// Reads the CPU model name from the fifth line of `/proc/cpuinfo`.
-/// 
+///
 /// # Returns
-/// 
+///
 /// Returns a `String` containing the CPU model name.
-/// 
+///
 /// # Panics
-/// 
+///
 /// Panics if `/proc/cpuinfo` cannot be read (non-Linux systems).
-/// 
+///
 /// # Examples
-/// 
+///
 /// ```rust
 /// use ffetch::get_cpu_name;
-/// 
+///
 /// let cpu = get_cpu_name();
 /// println!("CPU: {}", cpu);
 /// // Output: CPU: Intel(R) Core(TM) i7-8750H CPU @ 2.20GHz
@@ -202,25 +201,24 @@ pub fn get_cpu_name() -> String {
     "Unknown CPU".to_string()
 }
 
-
 /// Gets memory usage information from `/proc/meminfo`.
-/// 
+///
 /// Calculates used memory by subtracting available memory from total memory.
 /// Values are converted from kB to MB.
-/// 
+///
 /// # Returns
-/// 
+///
 /// Returns a `String` in the format "used / total" (e.g., "8192 / 16384").
-/// 
+///
 /// # Panics
-/// 
+///
 /// Panics if `/proc/meminfo` cannot be read.
-/// 
+///
 /// # Examples
-/// 
+///
 /// ```rust
 /// use ffetch::get_memory;
-/// 
+///
 /// let memory = get_memory();
 /// println!("Memory: {} MB", memory);
 /// // Output: Memory: 8192 / 16384 MB
@@ -253,24 +251,23 @@ pub fn get_memory() -> String {
     format!("{} / {}", memory_usage, total_memory)
 }
 
-
 /// Gets the operating system name from `/etc/os-release`.
-/// 
+///
 /// Extracts the NAME field from the os-release file and removes quotes.
-/// 
+///
 /// # Returns
-/// 
+///
 /// Returns a `String` containing the OS name (e.g., "Ubuntu").
-/// 
+///
 /// # Panics
-/// 
+///
 /// Panics if `/etc/os-release` cannot be read.
-/// 
+///
 /// # Examples
-/// 
+///
 /// ```rust
 /// use ffetch::get_os_name;
-/// 
+///
 /// let os = get_os_name();
 /// println!("OS: {}", os);
 /// // Output: OS: Ubuntu
@@ -291,20 +288,20 @@ pub fn get_os_name() -> String {
 }
 
 /// Gets the system hostname from `/etc/hostname`.
-/// 
+///
 /// # Returns
-/// 
+///
 /// Returns a `String` containing the hostname.
-/// 
+///
 /// # Panics
-/// 
+///
 /// Panics if `/etc/hostname` cannot be read.
-/// 
+///
 /// # Examples
-/// 
+///
 /// ```rust
 /// use ffetch::get_hostname;
-/// 
+///
 /// let hostname = get_hostname();
 /// println!("Hostname: {}", hostname);
 /// // Output: Hostname: my-computer
@@ -322,19 +319,19 @@ pub fn get_hostname() -> String {
 }
 
 /// Gets the desktop environment name from environment variables.
-/// 
+///
 /// Checks multiple environment variables in order of preference:
 /// `XDG_CURRENT_DESKTOP`, `DESKTOP_SESSION`, `GDMSESSION`.
-/// 
+///
 /// # Returns
-/// 
+///
 /// Returns a `String` containing the desktop environment name or "Unknown".
-/// 
+///
 /// # Examples
-/// 
+///
 /// ```rust
 /// use ffetch::get_desktop_env;
-/// 
+///
 /// let de = get_desktop_env();
 /// println!("Desktop Environment: {}", de);
 /// // Output: Desktop Environment: GNOME
@@ -347,16 +344,16 @@ pub fn get_desktop_env() -> String {
 }
 
 /// Gets the compositor backend from the `XDG_BACKEND` environment variable.
-/// 
+///
 /// # Returns
-/// 
+///
 /// Returns a `String` containing the backend name or "Unknown Backend".
-/// 
+///
 /// # Examples
-/// 
+///
 /// ```rust
 /// use ffetch::get_compositor;
-/// 
+///
 /// let compositor = get_compositor();
 /// println!("Compositor: {}", compositor);
 /// // Output: Compositor: wayland
@@ -365,22 +362,21 @@ pub fn get_compositor() -> String {
     env::var("XDG_BACKEND").unwrap_or_else(|_| "Unknown Backend".to_string())
 }
 
-
 /// Gets the CPU architecture using the `uname -m` command.
-/// 
+///
 /// # Returns
-/// 
+///
 /// Returns a `String` containing the architecture (e.g., "x86_64").
-/// 
+///
 /// # Panics
-/// 
+///
 /// Panics if the `uname` command fails.
-/// 
+///
 /// # Examples
-/// 
+///
 /// ```rust
 /// use ffetch::get_cpu_arch;
-/// 
+///
 /// let arch = get_cpu_arch();
 /// println!("Architecture: {}", arch);
 /// // Output: Architecture: x86_64
@@ -398,18 +394,18 @@ pub fn get_cpu_arch() -> String {
 }
 
 /// Gets the platform name.
-/// 
+///
 /// Currently hardcoded to return "Linux" as this library only supports Linux.
-/// 
+///
 /// # Returns
-/// 
+///
 /// Returns a `String` containing "Linux".
-/// 
+///
 /// # Examples
-/// 
+///
 /// ```rust
 /// use ffetch::get_platform;
-/// 
+///
 /// let platform = get_platform();
 /// println!("Platform: {}", platform);
 /// // Output: Platform: Linux
@@ -418,22 +414,21 @@ pub fn get_platform() -> String {
     "Linux".to_string()
 }
 
-
 /// Gets the system uptime using the `uptime -p` command.
-/// 
+///
 /// # Returns
-/// 
+///
 /// Returns a `String` containing the uptime in human-readable format.
-/// 
+///
 /// # Panics
-/// 
+///
 /// Panics if the `uptime` command fails.
-/// 
+///
 /// # Examples
-/// 
+///
 /// ```rust
 /// use ffetch::get_uptime;
-/// 
+///
 /// let uptime = get_uptime();
 /// println!("Uptime: {}", uptime);
 /// // Output: Uptime: 2 hours, 30 minutes
@@ -450,19 +445,19 @@ pub fn get_uptime() -> String {
 }
 
 /// Gets the number of installed packages from various package managers.
-/// 
+///
 /// Detects and counts packages from multiple package managers including:
 /// Portage, Flatpak, APT, DNF, YUM, Pacman, Zypper, Nix, and XBPS.
-/// 
+///
 /// # Returns
-/// 
+///
 /// Returns a `String` containing package counts for each detected manager.
-/// 
+///
 /// # Examples
-/// 
+///
 /// ```rust
 /// use ffetch::get_packages;
-/// 
+///
 /// let packages = get_packages();
 /// println!("Packages: {}", packages);
 /// // Output: Packages: 1234 (apt-get) 56 (flatpak)
@@ -499,21 +494,20 @@ pub fn get_packages() -> String {
     res.join(" ")
 }
 
-
 /// Gets the primary GPU information using `lspci`.
-/// 
+///
 /// Parses the output of `lspci` to find VGA compatible controllers and
 /// formats the GPU name for better readability.
-/// 
+///
 /// # Returns
-/// 
+///
 /// Returns a `String` containing the GPU name or an error message.
-/// 
+///
 /// # Examples
-/// 
+///
 /// ```rust
 /// use ffetch::get_gpu;
-/// 
+///
 /// let gpu = get_gpu();
 /// println!("GPU: {}", gpu);
 /// // Output: GPU: NVIDIA GeForce RTX 3080
@@ -588,19 +582,19 @@ pub fn get_gpu() -> String {
 }
 
 /// Gets the secondary/mobile GPU information using `lspci`.
-/// 
+///
 /// Searches for 3D controllers or secondary VGA controllers,
 /// typically used for discrete/mobile GPUs in laptops.
-/// 
+///
 /// # Returns
-/// 
+///
 /// Returns a `String` containing the mobile GPU name or "Mobile GPU not found".
-/// 
+///
 /// # Examples
-/// 
+///
 /// ```rust
 /// use ffetch::get_m_gpu;
-/// 
+///
 /// let mobile_gpu = get_m_gpu();
 /// println!("Mobile GPU: {}", mobile_gpu);
 /// // Output: Mobile GPU: NVIDIA GeForce GTX 1650 Mobile
@@ -732,12 +726,10 @@ pub fn get_m_gpu() -> String {
     "Mobile GPU not found".to_string()
 }
 
-
-
 /// Checks if the `lspci` command is available on the system.
-/// 
+///
 /// # Returns
-/// 
+///
 /// Returns `true` if `lspci` is available, `false` otherwise.
 fn is_lspci_available() -> bool {
     Command::new("which")
@@ -747,18 +739,17 @@ fn is_lspci_available() -> bool {
         .unwrap_or(false)
 }
 
-
 /// Gets the shell from the `SHELL` environment variable.
-/// 
+///
 /// # Returns
-/// 
+///
 /// Returns a `String` containing the shell path or "Unknown Shell".
-/// 
+///
 /// # Examples
-/// 
+///
 /// ```rust
 /// use ffetch::get_shell;
-/// 
+///
 /// let shell = get_shell();
 /// println!("Shell: {}", shell);
 /// // Output: Shell: /bin/bash
@@ -767,26 +758,25 @@ pub fn get_shell() -> String {
     env::var("SHELL").unwrap_or_else(|_| "Unknown Shell".to_string())
 }
 
-
 /// Gets monitor information for a specific monitor index.
-/// 
+///
 /// Retrieves display information including resolution, refresh rate,
 /// and primary monitor status.
-/// 
+///
 /// # Arguments
-/// 
+///
 /// * `monitor_index` - The zero-based index of the monitor to query
-/// 
+///
 /// # Returns
-/// 
+///
 /// Returns a `String` containing monitor details with format:
 /// "Name WIDTHxHEIGHT FREQUENCY Hz *" (asterisk indicates primary monitor)
-/// 
+///
 /// # Examples
-/// 
+///
 /// ```rust
 /// use ffetch::get_monitor;
-/// 
+///
 /// let monitor = get_monitor(0);
 /// println!("Primary Monitor: {}", monitor);
 /// // Output: Primary Monitor: HDMI-A-1 1920x1080 60 Hz *
@@ -810,30 +800,30 @@ pub fn get_monitor(monitor_index: usize) -> String {
 }
 
 /// Gets the current terminal emulator name using `xprop`.
-/// 
+///
 /// Uses X11 properties to identify the currently active window
 /// and extract the terminal emulator name from WM_CLASS.
-/// 
+///
 /// # Returns
-/// 
+///
 /// Returns a `String` containing the terminal name or falls back to `$TERM`.
-/// 
+///
 /// # Panics
-/// 
+///
 /// Panics if `xprop` command fails to execute.
-/// 
+///
 /// # Examples
-/// 
+///
 /// ```rust
 /// use ffetch::get_terminal;
-/// 
+///
 /// let terminal = get_terminal();
 /// println!("Terminal: {}", terminal);
 /// // Output: Terminal: gnome-terminal
 /// ```
-/// 
+///
 /// # Note
-/// 
+///
 /// This function requires X11 and the `xprop` utility to be available.
 /// It may not work in Wayland environments.
 

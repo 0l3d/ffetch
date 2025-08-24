@@ -1,9 +1,7 @@
 pub mod ffetch;
 use std::{fs, io::Write, path::Path};
 
-use lazy_static::lazy_static;
 use once_cell::sync::Lazy;
-use regex::Regex;
 
 fn read_lines(filename: &str) -> Vec<String> {
     let conf_path = Path::new(filename);
@@ -43,35 +41,12 @@ fn read_lines(filename: &str) -> Vec<String> {
     result
 }
 
-lazy_static! {
-    static ref DISK_REGEX: Regex = Regex::new(r"getDisk\((.*?)\)").expect("Regex error:");
-    static ref MON_REGEX: Regex = Regex::new(r"getMonitor\((.*?)\)").expect("Regex error:");
-    static ref PKG_REGEX: Regex = Regex::new(r"getPackages\((.*?)\)").expect("Regex error:");
-    static ref USERNAME: String = ffetch::get_username();
-    static ref TERMINAL: String = ffetch::get_terminal();
-    static ref KERNEL: String = ffetch::get_kernel_version();
-    static ref CPU: String = ffetch::get_cpu_name();
-    static ref INIT: String = ffetch::get_init_system();
-    static ref MEMORY: String = ffetch::get_memory();
-    static ref HOSTNAME: String = ffetch::get_hostname();
-    static ref OSNAME: String = ffetch::get_os_name();
-    static ref DESKTOP: String = ffetch::get_desktop_env();
-    static ref LOCALE: String = ffetch::get_locale();
-    static ref BACKEND: String = ffetch::get_compositor();
-    static ref ARCH: String = ffetch::get_cpu_arch();
-    static ref PLATFORM: String = ffetch::get_platform();
-    static ref UPTIME: String = ffetch::get_uptime();
-    static ref SHELL: String = ffetch::get_shell();
-    static ref PACKAGES: String = ffetch::get_packages();
-    static ref GPU: String = ffetch::get_gpu();
-    static ref mGPU: String = ffetch::get_m_gpu();
-    static ref GTK: String = ffetch::gtk_theme();
-    static ref QT: String = ffetch::qt_theme();
-    static ref PATH: String = format!(
+static PATH: Lazy<String> = Lazy::new(|| {
+    format!(
         "/home/{}/.config/ffetch/ffetch.conf",
         ffetch::get_username()
-    );
-}
+    )
+});
 
 static CONTENTS: Lazy<Vec<String>> = Lazy::new(|| {
     let conf_path = Path::new(&*PATH);
@@ -112,19 +87,158 @@ ascii_color = "fg.cyan"
         .collect()
 });
 
-fn comp_with_disk_argument(input: &str) -> String {
-    if let Some(caps) = DISK_REGEX.captures(input) {
-        return caps.get(1).unwrap().as_str().to_string();
+// LEXER (PERFORMANCE FOCUSED)
+fn lex_string(s: &str) -> Vec<String> {
+    let mut tokens = Vec::new();
+    let mut current = String::new();
+    let mut in_str = false;
+
+    for c in s.chars() {
+        if c == '"' {
+            if in_str {
+                tokens.push(current.clone());
+                current.clear();
+                in_str = false;
+            } else {
+                in_str = true;
+            }
+            continue;
+        } else if c == '#' {
+            break;
+        } else if (c == '(' || c == ')') && !in_str {
+            if !current.is_empty() {
+                tokens.push(current.clone());
+                current.clear();
+            }
+            tokens.push(c.to_string());
+        } else if c.is_whitespace() && !in_str {
+            if !current.is_empty() {
+                tokens.push(current.clone());
+                current.clear();
+            }
+        } else {
+            current.push(c);
+        }
     }
-    String::new()
+
+    if !current.is_empty() {
+        tokens.push(current);
+    }
+
+    tokens
 }
 
-fn comp_with_mon_argument(input: &str) -> usize {
-    if let Some(caps) = MON_REGEX.captures(input) {
-        let matched_str = caps.get(1).unwrap().as_str();
-        return matched_str.parse::<usize>().unwrap_or(0);
+fn parse_ansi_code(token: &str) -> &str {
+    match token {
+        "fg.black" => "\x1b[30m",
+        "fg.red" => "\x1b[31m",
+        "fg.green" => "\x1b[32m",
+        "fg.yellow" => "\x1b[33m",
+        "fg.blue" => "\x1b[34m",
+        "fg.magenta" => "\x1b[35m",
+        "fg.cyan" => "\x1b[36m",
+        "fg.white" => "\x1b[37m",
+        "fg.bright_black" => "\x1b[90m",
+        "fg.bright_red" => "\x1b[91m",
+        "fg.bright_green" => "\x1b[92m",
+        "fg.bright_yellow" => "\x1b[93m",
+        "fg.bright_blue" => "\x1b[94m",
+        "fg.bright_magenta" => "\x1b[95m",
+        "fg.bright_cyan" => "\x1b[96m",
+        "fg.bright_white" => "\x1b[97m",
+        "bg.black" => "\x1b[40m",
+        "bg.red" => "\x1b[41m",
+        "bg.green" => "\x1b[42m",
+        "bg.yellow" => "\x1b[43m",
+        "bg.blue" => "\x1b[44m",
+        "bg.magenta" => "\x1b[45m",
+        "bg.cyan" => "\x1b[46m",
+        "bg.white" => "\x1b[47m",
+        "bg.bright_black" => "\x1b[100m",
+        "bg.bright_red" => "\x1b[101m",
+        "bg.bright_green" => "\x1b[102m",
+        "bg.bright_yellow" => "\x1b[103m",
+        "bg.bright_blue" => "\x1b[104m",
+        "bg.bright_magenta" => "\x1b[105m",
+        "bg.bright_cyan" => "\x1b[106m",
+        "bg.bright_white" => "\x1b[107m",
+        "t.bold" => "\x1b[1m",
+        "t.dim" => "\x1b[2m",
+        "t.italic" => "\x1b[3m",
+        "t.underline" => "\x1b[4m",
+        "t.inverse" => "\x1b[7m",
+        "t.hidden" => "\x1b[8m",
+        "t.strike" => "\x1b[9m",
+        "t.bold_off" => "\x1b[21m",
+        "t.underline_off" => "\x1b[24m",
+        "t.inverse_off" => "\x1b[27m",
+        "all.reset" => "\x1b[0m",
+
+        _ => "",
     }
-    0
+}
+
+fn parser(tokens: Vec<String>) -> String {
+    let mut return_val: String = String::new();
+    let mut i = 0;
+
+    while i < tokens.len() {
+        let token = &tokens[i];
+
+        let ansi = parse_ansi_code(token);
+        if !ansi.is_empty() {
+            return_val.push_str(&ansi);
+            i += 1;
+            continue;
+        }
+
+        match token.as_str() {
+            "getUsername" => return_val.push_str(&ffetch::get_username()),
+            "getOsName" => return_val.push_str(&ffetch::get_os_name()),
+            "getArch" => return_val.push_str(&ffetch::get_cpu_arch()),
+            "getKernel" => return_val.push_str(&ffetch::get_kernel_version()),
+            "getCpu" => return_val.push_str(&ffetch::get_cpu_name()),
+            "getMemory" => return_val.push_str(&ffetch::get_memory()),
+            "getHostname" => return_val.push_str(&ffetch::get_hostname()),
+            "getDesktop" => return_val.push_str(&ffetch::get_desktop_env()),
+            "getBackend" => return_val.push_str(&ffetch::get_compositor()),
+            "getPlatform" => return_val.push_str(&ffetch::get_platform()),
+            "getUptime" => return_val.push_str(&ffetch::get_uptime()),
+            "getPackages" => return_val.push_str(&ffetch::get_packages()),
+            "getGpu" => return_val.push_str(&ffetch::get_gpu()),
+            "getMGpu" => return_val.push_str(&ffetch::get_m_gpu()),
+            "getShell" => return_val.push_str(&ffetch::get_shell()),
+            "getLocale" => return_val.push_str(&ffetch::get_locale()),
+            "getTerm" => return_val.push_str(&ffetch::get_terminal()),
+            "getGTK" => return_val.push_str(&ffetch::gtk_theme()),
+            "getQT" => return_val.push_str(&ffetch::qt_theme()),
+            "getInit" => return_val.push_str(&ffetch::get_init_system()),
+            "getMonitor" => {
+                if i + 3 < tokens.len() && tokens[i + 1] == "(" && tokens[i + 3] == ")" {
+                    let argstr = &tokens[i + 2];
+                    let arg = argstr.parse().unwrap();
+                    return_val.push_str(&ffetch::get_monitor(arg));
+                    i += 3;
+                } else {
+                    return_val.push_str("Invalid getMonitor usage");
+                }
+            }
+            "getDisk" => {
+                if i + 3 < tokens.len() && tokens[i + 1] == "(" && tokens[i + 3] == ")" {
+                    let argstr = &tokens[i + 2];
+                    return_val.push_str(&ffetch::get_disks(argstr));
+                    i += 3;
+                } else {
+                    return_val.push_str("Invalid getDiskusage");
+                }
+            }
+            "echo" => {}
+            _ => return_val.push_str(token),
+        }
+        i += 1;
+    }
+
+    return_val
 }
 
 fn find_token(string: &str, findstr: &str) -> bool {
@@ -137,156 +251,22 @@ fn find_token(string: &str, findstr: &str) -> bool {
     false
 }
 
-fn replace_syntax(conf: &str) -> String {
-    let disk = comp_with_disk_argument(conf);
-    let diskf = format!("getDisk({})", disk);
-
-    let monitor = comp_with_mon_argument(conf);
-    let monitorf = format!("getMonitor({})", monitor);
-    let index: usize = monitor;
-
-    let replaced_conf: String = conf
-        // strings
-        .replace('"', "")
-        .replace("getUsername", &USERNAME)
-        .replace("getKernel", &KERNEL)
-        .replace("getCpu", &CPU)
-        .replace("getMemory", &MEMORY)
-        .replace("getHostname", &HOSTNAME)
-        .replace("getOsName", &OSNAME)
-        .replace("getDesktop", &DESKTOP)
-        .replace("getArch", &ARCH)
-        .replace("getBackend", &BACKEND)
-        .replace("getPlatform", &PLATFORM)
-        .replace("getUptime", &UPTIME)
-        .replace("getPackages", &PACKAGES)
-        .replace("getGpu", &GPU)
-        .replace("getMGpu", &mGPU)
-        .replace("getShell", &SHELL)
-        .replace("getLocale", &LOCALE)
-        .replace("getTerm", &TERMINAL)
-        .replace("getGTK", &GTK)
-        .replace("getQT", &QT)
-	.replace("getInit", &INIT)
-        .replace(&diskf, &ffetch::get_disks(&disk))
-        .replace(&monitorf, &ffetch::get_monitor(index))
-        // Fg Colors
-	.replace("fg.black", "\x1b[30m")
-        .replace("fg.red", "\x1b[31m")
-        .replace("fg.green", "\x1b[32m")
-        .replace("fg.yellow", "\x1b[33m")
-        .replace("fg.blue", "\x1b[34m")
-        .replace("fg.magenta", "\x1b[35m")
-        .replace("fg.cyan", "\x1b[36m")
-        .replace("fg.white", "\x1b[37m")
-        .replace("fg.bright_black", "\x1b[90m")
-        .replace("fg.bright_red", "\x1b[91m")
-        .replace("fg.bright_green", "\x1b[92m")
-        .replace("fg.bright_yellow", "\x1b[93m")
-        .replace("fg.bright_blue", "\x1b[94m")
-        .replace("fg.bright _magenta", "\x1b[95m")
-        .replace("fg.bright_cyan", "\x1b[96m")
-        .replace("fg.bright_white", "\x1b[97m")
-        // Bg Colors
-        .replace("bg.black", "\x1b[40m")
-        .replace("bg.red", "\x1b[41m")
-        .replace("bg.green", "\x1b[42m")
-        .replace("bg.yellow", "\x1b[43m")
-        .replace("bg.blue", "\x1b[44m")
-        .replace("bg.magenta", "\x1b[45m")
-        .replace("bg.cyan", "\x1b[46m")
-        .replace("bg.white", "\x1b[47m")
-        .replace("bg.bright_black", "\x1b[100m")
-        .replace("bg.bright_red", "\x1b[101m")
-        .replace("bg.bright_green", "\x1b[102m")
-        .replace("bg.bright_yellow", "\x1b[103m")
-        .replace("bg.bright_blue", "\x1b[104m")
-        .replace("bg.bright_magenta", "\x1b[105m")
-        .replace("bg.bright_cyan", "\x1b[106m")
-        .replace("bg.bright_white", "\x1b[107m")
-        // Text Styles
-        .replace("t.bold", "\x1b[1m")
-        .replace("t.dim", "\x1b[2m")
-        .replace("t.italic", "\x1b[3m")
-        .replace("t.underline", "\x1b[4m")
-        .replace("t.inverse", "\x1b[7m")
-        .replace("t.hidden", "\x1b[8m")
-        .replace("t.strike", "\x1b[9m")
-        .replace("t.bold_off", "\x1b[21m")
-        .replace("t.underline_off", "\x1b[24m")
-        .replace("t.inverse_off", "\x1b[27m")
-        .replace("all.reset", "\x1b[0m");
-
-    replaced_conf
-}
-
-fn find_char(string: &str, target: char) -> bool {
-    for char in string.chars() {
-        if char == target {
-            return true;
-        }
-    }
-    false
-}
-
 fn get_option(token: &str) -> String {
-    let mut output: String = String::new();
-    for i in 0..CONTENTS.len() {
-        let tokens = &CONTENTS[i];
-        if find_char(tokens, '=') {
-            let tokenizer: &Vec<&str> = &tokens.split("=").collect();
-            let tokena: &Vec<&str> = &tokenizer[0].split(" ").collect();
-            if tokena[0] == token && find_char(tokens, '"') {
-                let mut newsplt: String = String::new();
-                if let Some(tk) = (1..tokenizer.len()).next() {
-                    newsplt += tokenizer[tk];
-                    output = newsplt.split('"').collect();
-                    output.replace_range(0..1, "");
-                    let routput = output.replace("getUsername", &USERNAME);
-                    return routput;
-                }
+    for line in CONTENTS.iter() {
+        let tokens = lex_string(line);
+
+        if tokens.len() >= 3 && tokens[0] == token && tokens[1] == "=" {
+            let mut value = tokens[2].clone();
+
+            if value.contains("getUsername") {
+                value = value.replace("getUsername", &ffetch::get_username());
             }
-        } else {
-            continue;
+
+            return value;
         }
     }
-    output
-}
 
-fn lex_config(input: &str) -> String {
-    let input = input.trim_start();
-    let input = if let Some(strip) = input.strip_prefix("echo ") {
-        strip.trim_start()
-    } else {
-        input
-    };
-    let mut result = String::new();
-    let mut in_string = false;
-    let mut current = String::new();
-    for c in input.chars() {
-        match c {
-            '"' => {
-                current.push(c);
-                in_string = !in_string;
-                if !in_string {
-                    result.push_str(&current);
-                    current.clear();
-                }
-            }
-            ' ' if !in_string => {
-                if !current.is_empty() {
-                    result.push_str(&current);
-                    current.clear();
-                }
-            }
-            _ => current.push(c),
-        }
-    }
-    if !current.is_empty() {
-        result.push_str(&current);
-    }
-
-    result
+    String::new()
 }
 
 // fn colorize_ascii(ascii: String) {}
@@ -296,13 +276,13 @@ fn write_fetch(ascii: Vec<String>, ascii_color: String) -> String {
     let mut ascii_index = 0;
     for i in 0..CONTENTS.len() {
         let tokens = &CONTENTS[i];
-        let lexed_conf: String = lex_config(tokens);
-        let replaced_conf = replace_syntax(&lexed_conf);
+        let lexed_conf: Vec<String> = lex_string(tokens);
+        let replaced_conf = parser(lexed_conf);
 
         if find_token(tokens, "echo") {
             let end_conf = format!(
                 "{}{:<width$}\x1b[0m    {}\x1b[0m",
-                replace_syntax(&ascii_color),
+                parse_ansi_code(&ascii_color),
                 ascii.get(ascii_index).unwrap_or(&"".to_string()),
                 replaced_conf,
                 width = max_width
@@ -316,7 +296,7 @@ fn write_fetch(ascii: Vec<String>, ascii_color: String) -> String {
         let line = &ascii[ascii_index];
         println!(
             "{}{:<width$}",
-            replace_syntax(&ascii_color),
+            parse_ansi_code(&ascii_color),
             line,
             width = max_width
         );
