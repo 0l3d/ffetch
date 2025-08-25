@@ -826,7 +826,6 @@ pub fn get_monitor(monitor_index: usize) -> String {
 ///
 /// This function requires X11 and the `xprop` utility to be available.
 /// It may not work in Wayland environments.
-
 pub fn get_terminal() -> String {
     let output = Command::new("xprop")
         .args(["-root", "_NET_ACTIVE_WINDOW"])
