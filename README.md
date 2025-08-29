@@ -278,7 +278,7 @@ Or add to your `Cargo.toml`:
 
 ```toml
 [dependencies]
-ffetch = "0.4.2"
+ffetch = "0.5.2"
 ```
 
 ## 🛠️ **Example Usage**
