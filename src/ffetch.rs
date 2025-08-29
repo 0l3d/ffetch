@@ -3,7 +3,8 @@ use once_cell::sync::Lazy;
 use regex::Regex;
 use std::{
     env,
-    fs::{metadata, read_link, read_to_string},
+    fs::{metadata, read_dir, read_link, read_to_string, File},
+    io::{BufRead, BufReader},
     process::Command,
 };
 use which::which;
@@ -449,6 +450,11 @@ pub fn get_uptime() -> String {
 /// Detects and counts packages from multiple package managers including:
 /// Portage, Flatpak, APT, DNF, YUM, Pacman, Zypper, Nix, and XBPS.
 ///
+/// # Notes
+/// This function runs external commands (`rpm -qa`) only for RPM-based
+/// package managers (DNF, YUM, Zypper). Other managers use direct
+/// file/directory reading.
+///
 /// # Returns
 ///
 /// Returns a `String` containing package counts for each detected manager.
@@ -464,33 +470,97 @@ pub fn get_uptime() -> String {
 /// ```
 pub fn get_packages() -> String {
     let mut res = Vec::new();
+    fn count_emerge() -> Option<usize> {
+        let mut count = 0;
+        for entry in read_dir("/var/db/pkg").ok()? {
+            let entry = entry.ok()?;
+            if entry.path().is_dir() {
+                for pkg in read_dir(entry.path()).ok()? {
+                    if pkg.ok()?.path().is_dir() {
+                        count += 1;
+                    }
+                }
+            }
+        }
+        Some(count)
+    }
 
-    let managers = [
-        ("emerge", vec!["qlist", "-I"]),
-        ("flatpak", vec!["flatpak", "list"]),
-        ("apt-get", vec!["apt-get", "list", "--installed"]),
-        ("dnf", vec!["dnf", "list", "installed"]),
-        ("yum", vec!["yum", "list", "installed"]),
-        ("pacman", vec!["pacman", "-Q"]),
-        ("zypper", vec!["zypper", "se", "--installed-only"]),
-        ("nix", vec!["nix-env", "-q"]),
-        ("xbps", vec!["xbps-query", "-l"]),
+    fn count_flatpak() -> Option<usize> {
+        let apps = read_dir("/var/lib/flatpak/app").ok()?.count();
+        let runtimes = read_dir("/var/lib/flatpak/runtime").ok()?.count();
+        Some(apps + runtimes)
+    }
+
+    fn count_dpkg() -> Option<usize> {
+        let file = File::open("/var/lib/dpkg/status").ok()?;
+        let reader = BufReader::new(file);
+        let count = reader
+            .lines()
+            .filter_map(|l| l.ok())
+            .filter(|l| l.starts_with("Package: "))
+            .count();
+        Some(count)
+    }
+
+    fn count_pacman() -> Option<usize> {
+        Some(read_dir("/var/lib/pacman/local").ok()?.count())
+    }
+
+    fn count_nix() -> Option<usize> {
+        Some(read_dir("/nix/store").ok()?.count())
+    }
+
+    fn count_xbps() -> Option<usize> {
+        let path = "/var/db/xbps";
+        let count = read_dir(path)
+            .ok()?
+            .filter(|e| {
+                e.as_ref()
+                    .ok()
+                    .map(|x| {
+                        x.path()
+                            .extension()
+                            .map(|ext| ext == "plist")
+                            .unwrap_or(false)
+                    })
+                    .unwrap_or(false)
+            })
+            .count();
+        Some(count)
+    }
+
+    fn count_rpm() -> Option<usize> {
+        let output = Command::new("rpm").arg("-qa").output().ok()?;
+
+        if !output.stdout.is_empty() {
+            let count = String::from_utf8_lossy(&output.stdout).lines().count();
+            Some(count)
+        } else {
+            None
+        }
+    }
+
+    let backends: &[(&str, fn() -> Option<usize>)] = &[
+        ("emerge", count_emerge),
+        ("flatpak", count_flatpak),
+        ("apt-get", count_dpkg),
+        ("pacman", count_pacman),
+        ("nix", count_nix),
+        ("xbps", count_xbps),
     ];
 
-    for (name, cmd) in managers.iter() {
-        if which(cmd[0]).is_ok() {
-            let output = Command::new(cmd[0])
-                .args(&cmd[1..])
-                .output()
-                .expect("Command failed");
-
-            let stdout = String::from_utf8_lossy(&output.stdout);
-            let count = stdout.lines().count();
-
+    for (name, func) in backends {
+        if let Some(count) = func() {
             res.push(format!("{count} ({name})"));
         }
     }
 
+    let rpm_managers = ["dnf", "yum", "zypper"];
+    for name in rpm_managers.iter() {
+        if let Some(count) = count_rpm() {
+            res.push(format!("{count} ({name})"));
+        }
+    }
     res.join(" ")
 }
 
