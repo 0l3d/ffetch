@@ -7,7 +7,6 @@ use std::{
     io::{BufRead, BufReader},
     process::Command,
 };
-use which::which;
 
 pub static DISPLAY_INFORMATION: Lazy<Vec<DisplayInfo>> = Lazy::new(|| DisplayInfo::all().unwrap());
 
