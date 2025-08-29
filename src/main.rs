@@ -53,7 +53,7 @@ static CONTENTS: Lazy<Vec<String>> = Lazy::new(|| {
     if !conf_path.exists() {
         if let Some(parent) = conf_path.parent() {
             if !parent.exists() {
-                println!("{:?}", parent);
+                println!("{parent:?}");
                 fs::create_dir_all(parent).expect("Parent directory create error.");
             }
         }
@@ -187,7 +187,7 @@ fn parser(tokens: Vec<String>) -> String {
 
         let ansi = parse_ansi_code(token);
         if !ansi.is_empty() {
-            return_val.push_str(&ansi);
+            return_val.push_str(ansi);
             i += 1;
             continue;
         }
@@ -288,7 +288,7 @@ fn write_fetch(ascii: Vec<String>, ascii_color: String) -> String {
                 width = max_width
             );
             ascii_index += 1;
-            println!("{}", end_conf);
+            println!("{end_conf}");
         }
     }
 

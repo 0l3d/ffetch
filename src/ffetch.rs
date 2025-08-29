@@ -248,7 +248,7 @@ pub fn get_memory() -> String {
         }
     }
     let memory_usage = total_memory - free_memory;
-    format!("{} / {}", memory_usage, total_memory)
+    format!("{memory_usage} / {total_memory}")
 }
 
 /// Gets the operating system name from `/etc/os-release`.
@@ -487,7 +487,7 @@ pub fn get_packages() -> String {
             let stdout = String::from_utf8_lossy(&output.stdout);
             let count = stdout.lines().count();
 
-            res.push(format!("{} ({})", count, name));
+            res.push(format!("{count} ({name})"));
         }
     }
 
