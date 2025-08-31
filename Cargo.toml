@@ -1,6 +1,6 @@
 [package]
 name = "ffetch"
-version = "0.5.2"
+version = "0.5.5"
 authors = ["0l3d <0l3dgit@gmail.com>"]
 edition = "2021"
 description = "Fast, minimal & Rust-powered system fetcher"
