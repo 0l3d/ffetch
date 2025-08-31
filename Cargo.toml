@@ -41,9 +41,5 @@ panic = "abort"
 strip = "symbols"
 
 
-# ADD DEB AND RPM PACKAGING.
-
 [dependencies]
-once_cell = "1.21.3"
 display-info = "0.5.4"
-regex = "1.11.2"

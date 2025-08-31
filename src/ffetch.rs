@@ -1,18 +1,10 @@
 use display_info::DisplayInfo;
-use once_cell::sync::Lazy;
-use regex::Regex;
 use std::{
     env,
     fs::{metadata, read_dir, read_link, read_to_string, File},
     io::{BufRead, BufReader},
     process::Command,
 };
-
-pub static DISPLAY_INFORMATION: Lazy<Vec<DisplayInfo>> = Lazy::new(|| DisplayInfo::all().unwrap());
-
-pub static REGEX: Lazy<Regex> = Lazy::new(|| Regex::new(r"window id # (0x[0-9a-f]+)").unwrap());
-
-pub static NAME_REGEX: Lazy<Regex> = Lazy::new(|| Regex::new(r#""([^"]+)""#).unwrap());
 
 /// Gets the Linux kernel version from `/proc/version`.
 ///
@@ -852,17 +844,17 @@ pub fn get_shell() -> String {
 /// ```
 pub fn get_monitor(monitor_index: usize) -> String {
     let mut trues = "";
-
-    if DISPLAY_INFORMATION[monitor_index].is_primary {
+    let display_info = DisplayInfo::all().unwrap();
+    if display_info[monitor_index].is_primary {
         trues = "*";
     }
 
     let all_of_things = format!(
         "{} {}x{} {} Hz {}",
-        DISPLAY_INFORMATION[monitor_index].friendly_name,
-        DISPLAY_INFORMATION[monitor_index].width,
-        DISPLAY_INFORMATION[monitor_index].height,
-        DISPLAY_INFORMATION[monitor_index].frequency,
+        display_info[monitor_index].friendly_name,
+        display_info[monitor_index].width,
+        display_info[monitor_index].height,
+        display_info[monitor_index].frequency,
         trues
     );
     all_of_things
@@ -903,13 +895,14 @@ pub fn get_terminal() -> String {
 
     let stdout = String::from_utf8_lossy(&output.stdout);
 
-    let window_id = match REGEX.captures(&stdout) {
-        Some(cap) => cap[1].to_string(),
-        None => {
+    let window_id = stdout
+        .split("window id # ")
+        .nth(1)
+        .map(|s| s.trim().to_string())
+        .unwrap_or_else(|| {
             eprintln!("⚠️ Window not found.");
-            return "".to_string();
-        }
-    };
+            "".to_string()
+        });
 
     let output = Command::new("xprop")
         .args(["-id", &window_id])
@@ -919,14 +912,15 @@ pub fn get_terminal() -> String {
     let info = String::from_utf8_lossy(&output.stdout);
     for line in info.lines() {
         if line.starts_with("WM_CLASS") {
-            let mut matches = NAME_REGEX.captures_iter(line);
-
-            if let Some(app_class) = matches.next() {
-                let terminal = app_class[1].to_string();
-                return terminal;
+            if let Some(start) = line.find('"') {
+                if let Some(end) = line[start + 1..].find('"') {
+                    let terminal = &line[start + 1..start + 1 + end];
+                    return terminal.to_string();
+                }
             }
         }
     }
+
     env::var("TERM").unwrap_or_else(|_| "Unknown".to_string())
 }
 

@@ -1,8 +1,6 @@
 pub mod ffetch;
 use std::{fs, io::Write, path::Path};
 
-use once_cell::sync::Lazy;
-
 fn read_lines(filename: &str) -> Vec<String> {
     let conf_path = Path::new(filename);
     if !conf_path.exists() {
@@ -41,23 +39,25 @@ fn read_lines(filename: &str) -> Vec<String> {
     result
 }
 
-static PATH: Lazy<String> = Lazy::new(|| {
+fn get_config_path() -> String {
     format!(
         "/home/{}/.config/ffetch/ffetch.conf",
         ffetch::get_username()
     )
-});
+}
 
-static CONTENTS: Lazy<Vec<String>> = Lazy::new(|| {
-    let conf_path = Path::new(&*PATH);
+fn get_contents() -> Vec<String> {
+    let path = get_config_path();
+    let conf_path = Path::new(&path);
+
     if !conf_path.exists() {
         if let Some(parent) = conf_path.parent() {
             if !parent.exists() {
-                println!("{parent:?}");
                 fs::create_dir_all(parent).expect("Parent directory create error.");
             }
         }
-        let mut file = fs::File::create(&*PATH).expect("file create error.");
+
+        let mut file = fs::File::create(&path).expect("file create error.");
         let content = r#"
 # middle config
 echo t.bold fg.yellow getUsername fg.black "@" fg.yellow getHostname
@@ -80,12 +80,13 @@ ascii_color = "fg.cyan"
         file.write_all(content.as_bytes())
             .expect("file write error.");
     }
-    fs::read_to_string(&*PATH)
+
+    fs::read_to_string(&path)
         .expect("Failed to read file")
         .lines()
         .map(|s| s.to_string())
         .collect()
-});
+}
 
 // LEXER (PERFORMANCE FOCUSED)
 fn lex_string(s: &str) -> Vec<String> {
@@ -252,7 +253,7 @@ fn find_token(string: &str, findstr: &str) -> bool {
 }
 
 fn get_option(token: &str) -> String {
-    for line in CONTENTS.iter() {
+    for line in get_contents().iter() {
         let tokens = lex_string(line);
 
         if tokens.len() >= 3 && tokens[0] == token && tokens[1] == "=" {
@@ -274,8 +275,8 @@ fn get_option(token: &str) -> String {
 fn write_fetch(ascii: Vec<String>, ascii_color: String) -> String {
     let max_width = ascii.iter().map(|line| line.len()).max().unwrap_or(0);
     let mut ascii_index = 0;
-    for i in 0..CONTENTS.len() {
-        let tokens = &CONTENTS[i];
+    for i in 0..get_contents().len() {
+        let tokens = &get_contents()[i];
         let lexed_conf: Vec<String> = lex_string(tokens);
         let replaced_conf = parser(lexed_conf);
 
