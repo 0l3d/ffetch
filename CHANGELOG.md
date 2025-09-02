@@ -1,5 +1,5 @@
-# [0.2.13]
+# [0.2.16]
 
 ### What's Changed?
 
-- Performance improved
+- New Features: Motherboard informations.

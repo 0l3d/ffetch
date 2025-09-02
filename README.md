@@ -68,21 +68,27 @@ At its core, it works simply and the codebase is easy to understand. 💡
 
 - `getMonitor(monitorindex)`  
   Returns the **Monitor** information for the specified monitor index.
+
 - `getPackages` (emerge, flatpak, apt, dnf, yum, pacman, zypper, nix-env, xbps-query)  
   Returns the **number of installed packages**.
 
 - `getLocale`  
   Returns your system **locale** (e.g., `en_US`).
+
 - `getTerm`  
   Returns your **terminal emulator**.
 
 - `getBackend`  
   Returns your **windowing system**.
+
 - `getInit`  
   Returns your system **init** (e.g, `runit-init`).
 
 - `getQT` or `getGTK`  
   Returns your theme from environment variables.
+
+- `getBoardVendor`, `getBoardName` and `getBoardVersion`  
+  Returns your system motherboard informations. (e.g, MSI)
 
 # F-Fetch Style ANSI Color Codes Reference
 

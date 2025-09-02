@@ -41,6 +41,99 @@ pub fn get_kernel_version() -> String {
     kernel_result_full[2].to_string()
 }
 
+/// Gets the motherboard vendor from `/sys/class/dmi/id/board_vendor`.
+///
+/// This function reads the vendor information of the mainboard from the
+/// sysfs DMI interface provided by the Linux kernel.
+///
+/// # Returns
+///
+/// Returns a `String` containing the motherboard vendor name  
+/// (e.g., `"Micro-Star International Co., Ltd."`, `"ASUSTeK COMPUTER INC."`).
+///
+/// # Panics
+///
+/// Panics if `/sys/class/dmi/id/board_vendor` cannot be read
+/// (e.g., if the file does not exist or the system does not provide DMI info).
+///
+/// # Examples
+///
+/// ```rust
+/// use ffetch::get_board_vendor;
+///
+/// let vendor = get_board_vendor();
+/// println!("Motherboard vendor: {}", vendor);
+/// // Output: Motherboard vendor: Micro-Star International Co., Ltd.
+/// ```
+pub fn get_board_vendor() -> String {
+    read_to_string("/sys/class/dmi/id/board_vendor")
+        .expect("board_vendor is not found on your filesystem.")
+        .trim()
+        .to_string()
+}
+
+/// Gets the motherboard name (model) from `/sys/class/dmi/id/board_name`.
+///
+/// This function reads the mainboard model information from the
+/// sysfs DMI interface provided by the Linux kernel.
+///
+/// # Returns
+///
+/// Returns a `String` containing the motherboard model name  
+/// (e.g., `"MS-7D95"`, `"ROG STRIX B550-F GAMING"`).
+///
+/// # Panics
+///
+/// Panics if `/sys/class/dmi/id/board_name` cannot be read
+/// (e.g., if the file does not exist or the system does not provide DMI info).
+///
+/// # Examples
+///
+/// ```rust
+/// use ffetch::get_board_name;
+///
+/// let name = get_board_name();
+/// println!("Motherboard name: {}", name);
+/// // Output: Motherboard name: MS-7D95
+/// ```
+pub fn get_board_name() -> String {
+    read_to_string("/sys/class/dmi/id/board_name")
+        .expect("board_name is not found on your filesystem.")
+        .trim()
+        .to_string()
+}
+
+/// Gets the motherboard version from `/sys/class/dmi/id/board_version`.
+///
+/// This function reads the mainboard version information from the
+/// sysfs DMI interface provided by the Linux kernel.
+///
+/// # Returns
+///
+/// Returns a `String` containing the motherboard version  
+/// (e.g., `"1.0"`, `"Rev X.0"`, `"Not Specified"`).
+///
+/// # Panics
+///
+/// Panics if `/sys/class/dmi/id/board_version` cannot be read
+/// (e.g., if the file does not exist or the system does not provide DMI info).
+///
+/// # Examples
+///
+/// ```rust
+/// use ffetch::get_board_ver;
+///
+/// let version = get_board_ver();
+/// println!("Motherboard version: {}", version);
+/// // Output: Motherboard version: 1.0
+/// ```
+pub fn get_board_ver() -> String {
+    read_to_string("/sys/class/dmi/id/board_version")
+        .expect("board_version is not found on your filesystem.")
+        .trim()
+        .to_string()
+}
+
 /// Gets the system init system
 /// # Returns
 ///

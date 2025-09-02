@@ -195,6 +195,9 @@ fn parser(tokens: Vec<String>) -> String {
 
         match token.as_str() {
             "getUsername" => return_val.push_str(&ffetch::get_username()),
+            "getBoardVendor" => return_val.push_str(&ffetch::get_board_vendor()),
+            "getBoardName" => return_val.push_str(&ffetch::get_board_name()),
+            "getBoardVersion" => return_val.push_str(&ffetch::get_board_ver()),
             "getOsName" => return_val.push_str(&ffetch::get_os_name()),
             "getArch" => return_val.push_str(&ffetch::get_cpu_arch()),
             "getKernel" => return_val.push_str(&ffetch::get_kernel_version()),
