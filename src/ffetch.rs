@@ -1,10 +1,10 @@
-use display_info::DisplayInfo;
 use std::{
     env,
     fs::{metadata, read_dir, read_link, read_to_string, File},
     io::{BufRead, BufReader},
     process::Command,
 };
+use xrandr_parser::Parser;
 
 /// Gets the Linux kernel version from `/proc/version`.
 ///
@@ -937,17 +937,20 @@ pub fn get_shell() -> String {
 /// ```
 pub fn get_monitor(monitor_index: usize) -> String {
     let mut trues = "";
-    let display_info = DisplayInfo::all().unwrap();
-    if display_info[monitor_index].is_primary {
+
+    let mut xrandr_parser_var = Parser::new();
+
+    xrandr_parser_var.parse().expect("Xrandr parser is failed");
+    let connectors = &xrandr_parser_var.connectors();
+    if connectors[monitor_index].primary {
         trues = "*";
     }
 
     let all_of_things = format!(
-        "{} {}x{} {} Hz {}",
-        display_info[monitor_index].friendly_name,
-        display_info[monitor_index].width,
-        display_info[monitor_index].height,
-        display_info[monitor_index].frequency,
+        "{} {} {} Hz {}",
+        connectors[monitor_index].name,
+        &connectors[monitor_index].current_resolution.pretty(),
+        connectors[monitor_index].current_refresh_rate,
         trues
     );
     all_of_things

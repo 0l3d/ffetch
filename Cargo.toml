@@ -1,6 +1,6 @@
 [package]
 name = "ffetch"
-version = "0.5.5"
+version = "0.2.15"
 authors = ["0l3d <0l3dgit@gmail.com>"]
 edition = "2021"
 description = "Fast, minimal & Rust-powered system fetcher"
@@ -42,4 +42,4 @@ strip = "symbols"
 
 
 [dependencies]
-display-info = "0.5.4"
+xrandr-parser = "0.3.0"
