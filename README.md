@@ -15,7 +15,7 @@ At its core, it works simply and the codebase is easy to understand. 💡
 
 ---
 
-![voidimage](https://github.com/user-attachments/assets/336c3423-4d1b-40c6-92e7-8eb1b0ad0bd2)
+<img width="1100" height="608" alt="image" src="https://github.com/user-attachments/assets/23fcc419-4c0b-4e3e-aeda-b557b45cb690" />
 
 ---
 
