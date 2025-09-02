@@ -19,6 +19,30 @@ At its core, it works simply and the codebase is easy to understand. 💡
 
 ---
 
+# ⚙️ **Installation & Configuration**
+
+## 📦 **Install via Cargo**
+
+```bash
+# Install from crates.io
+cargo install ffetch
+```
+
+## 🚀 **Installation Script**
+
+```bash
+# Run Installation Script
+bash <(curl -s https://raw.githubusercontent.com/0l3d/ffetch/master/install.sh)
+```
+
+## 🏃 **Run F-Fetch**
+
+```bash
+ffetch
+```
+
+---
+
 # F-Fetch Components List
 
 - `getUsername`  
@@ -241,31 +265,6 @@ echo "Shell: " getShell
 
 ascii = "/home/getUsername/.config/ffetch/ascii.txt"
 ascii_color = "fg.cyan"
-
-```
-
----
-
-# ⚙️ **Installation & Configuration**
-
-## 📦 **Install via Cargo**
-
-```bash
-# Install from crates.io
-cargo install ffetch
-```
-
-## 🚀 **Installation Script**
-
-```bash
-# Run Installation Script
-bash <(curl -s https://raw.githubusercontent.com/0l3d/ffetch/master/install.sh)
-```
-
-## 🏃 **Run F-Fetch**
-
-```bash
-ffetch
 ```
 
 ---
