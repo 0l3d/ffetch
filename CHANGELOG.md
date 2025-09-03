@@ -1,6 +1,5 @@
-# [0.2.16]
+# [0.2.17]
 
 ### What's Changed?
 
-- New Features: Motherboard informations.
 - Reduce Deps
