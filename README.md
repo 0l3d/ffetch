@@ -1,8 +1,8 @@
-# 🚀 **F-Fetch:** _Fast, Minimal & Rust-Powered System Fetcher_ 🦀✨
+# 🚀 **F-Fetch:** _Fast, Minimal & Rust-Powered System Fetcher_ 
 
 F-Fetch is a **very fast**, **minimal** terminal system fetcher written **100% in Rust**.  
 It is **highly customizable** - allowing you to add your own syntax and integrate your own features.  
-At its core, it works simply and the codebase is easy to understand. 💡
+At its core, it works simply and the codebase is easy to understand. 
 
 ---
 
@@ -40,6 +40,42 @@ bash <(curl -s https://raw.githubusercontent.com/0l3d/ffetch/master/install.sh)
 ```bash
 ffetch
 ```
+---
+# 📚 **Use as Library**
+
+You can also use F-Fetch as a library in your Rust projects:
+
+## 📥 **Add to your project**
+
+```bash
+cargo add ffetch
+```
+
+Or add to your `Cargo.toml`:
+
+```toml
+[dependencies]
+ffetch = "0.5.5"
+```
+
+## 🛠️ **Example Usage**
+
+```rust
+use ffetch::*;
+
+fn main() {
+    // Get system information
+    let username = get_username();
+    let os_name = get_os_name();
+    let cpu_info = get_cpu();
+    let memory = get_memory();
+
+    println!("User: {}", username);
+    println!("OS: {}", os_name);
+    println!("CPU: {}", cpu_info);
+    println!("Memory: {} MB", memory);
+}
+```
 
 ---
 
@@ -49,7 +85,9 @@ If u're using `getTerm`, u need to make sure xprop is installed.
 
 For GPU and disk information, I use standard Linux tools like lspci (from pciutils) and df (from coreutils).
 
-# F-Fetch Components List
+# F-Fetch Configuration & Examples
+
+## F-Fetch Components List 
 
 - `getUsername`  
   Returns the current **Username**.
@@ -120,9 +158,9 @@ For GPU and disk information, I use standard Linux tools like lspci (from pciuti
 - `getBoardVendor`, `getBoardName` and `getBoardVersion`  
   Returns your system motherboard informations. (e.g, MSI)
 
-# F-Fetch Style ANSI Color Codes Reference
+## F-Fetch Style ANSI Color Codes Reference
 
-## 🎨 Foreground Colors (Text Colors)
+### 🎨 Foreground Colors (Text Colors)
 
 | Placeholder  | ANSI Code  | Color | Description  |
 | ------------ | ---------- | ----- | ------------ |
@@ -135,7 +173,7 @@ For GPU and disk information, I use standard Linux tools like lspci (from pciuti
 | `fg.cyan`    | `\x1b[36m` | 🔵    | Cyan text    |
 | `fg.white`   | `\x1b[37m` | ⚪    | White text   |
 
-## ✨ Bright Foreground Colors
+### ✨ Bright Foreground Colors
 
 | Placeholder         | ANSI Code  | Color | Description              |
 | ------------------- | ---------- | ----- | ------------------------ |
@@ -148,7 +186,7 @@ For GPU and disk information, I use standard Linux tools like lspci (from pciuti
 | `fg.bright_cyan`    | `\x1b[96m` | 🔵    | Bright cyan text         |
 | `fg.bright_white`   | `\x1b[97m` | ⚪    | Bright white text        |
 
-## 🎭 Background Colors
+### 🎭 Background Colors
 
 | Placeholder  | ANSI Code  | Color | Description        |
 | ------------ | ---------- | ----- | ------------------ |
@@ -161,7 +199,7 @@ For GPU and disk information, I use standard Linux tools like lspci (from pciuti
 | `bg.cyan`    | `\x1b[46m` | 🔵    | Cyan background    |
 | `bg.white`   | `\x1b[47m` | ⚪    | White background   |
 
-## 🌟 Bright Background Colors
+### 🌟 Bright Background Colors
 
 | Placeholder         | ANSI Code   | Color | Description                    |
 | ------------------- | ----------- | ----- | ------------------------------ |
@@ -174,7 +212,7 @@ For GPU and disk information, I use standard Linux tools like lspci (from pciuti
 | `bg.bright_cyan`    | `\x1b[106m` | 🔵    | Bright cyan background         |
 | `bg.bright_white`   | `\x1b[107m` | ⚪    | Bright white background        |
 
-## 📝 Text Styles
+### 📝 Text Styles
 
 | Placeholder       | ANSI Code  | Style            | Description                |
 | ----------------- | ---------- | ---------------- | -------------------------- |
@@ -189,7 +227,7 @@ For GPU and disk information, I use standard Linux tools like lspci (from pciuti
 | `t.underline_off` | `\x1b[24m` | Normal           | Turn off underline         |
 | `t.inverse_off`   | `\x1b[27m` | Normal           | Turn off inverse           |
 
-## 🔄 Reset
+### 🔄 Reset
 
 | Placeholder | ANSI Code | Function | Description          |
 | ----------- | --------- | -------- | -------------------- |
@@ -197,38 +235,40 @@ For GPU and disk information, I use standard Linux tools like lspci (from pciuti
 
 ---
 
-# 🛠️ **F-Fetch Configuration Examples**
+## 🛠️ **F-Fetch Configuration Examples**
 
 ### (Advanced, Middle, Minimal)
 
 ```bash
 # 🌟 Advanced config
-echo "╭───────────── " t.underline t.bold fg.yellow getUsername
-echo "│  " t.underline " System Information :"
-echo "│    " fg.blue " OS: " fg.cyan getOsName " " t.italic fg.yellow t.bold getArch
-echo "│    " fg.blue " Kernel: " fg.black getPlatform " " fg.green getKernel
-echo "│    " fg.blue " Hostname: " fg.cyan getHostname
-echo "│    " fg.blue " Packages: " fg.cyan getPackages
-echo "│    " fg.blue " Locale: " fg.cyan getLocale
+echo "╭───────────── " t.underline t.bold fg.yellow getUsername all.reset " ─────────────────────────╮"
+echo "│  " t.underline fg.bright_red " System Information :"
+echo "│    " fg.white t.bold " OS: " all.reset fg.green getOsName " " t.italic fg.yellow t.bold getArch
+echo "│    " fg.white t.bold "󰇅 Host: " all.reset fg.green getBoardName " " (getBoardVersion)
+echo "│    " fg.white t.bold " Kernel: " all.reset fg.green getKernel
+echo "│    " fg.white t.bold " Hostname: " all.reset fg.green getHostname
+echo "│    " fg.white t.bold " Packages: " all.reset fg.green getPackages
+echo "│    " fg.white t.bold " Locale: " all.reset fg.green getLocale
+echo "│    " fg.white t.bold " Init: " all.reset fg.green getInit
+echo "│    " 
+echo "│  " t.underline fg.bright_green "󰋊 Hardware Information :"
 echo "│    "
-echo "│  " t.underline "󰋊 Hardware Information :"
+echo "│    " fg.yellow t.bold " CPU: " all.reset fg.white getCpu
+echo "│    " fg.yellow t.bold "󰍹 GPU: " all.reset fg.white getGpu
+echo "│    " fg.yellow t.bold " Memory: " all.reset fg.white getMemory fg.yellow " MB"
+echo "│    " fg.yellow t.bold " Root: " all.reset fg.white getDisk(/)
 echo "│    "
-echo "│    " fg.yellow " CPU: " fg.white t.bold getCpu
-echo "│    " fg.yellow "󰍹 GPU: " fg.white t.bold getGpu
-echo "│    " fg.yellow " Memory: " fg.white t.bold getMemory fg.yellow " MB"
-echo "│    " fg.yellow " Root: " fg.white t.bold getDisk(/)
+echo "│  " t.underline fg.bright_blue " Desktop Information :"
 echo "│    "
-echo "│  " t.underline " Desktop Information :"
-echo "│    "
-echo "│    " fg.magenta "󰪫 DE/WM: " fg.white t.bold getDesktop
-echo "│    " fg.magenta " Uptime: " fg.white t.bold getUptime
-echo "│    " fg.magenta "󰧨 Primary: " fg.white t.bold getMonitor(0)
-echo "│    " fg.magenta " Shell: " fg.white t.bold getShell
-echo "│    " fg.magenta " Terminal: " fg.white t.bold getTerm
-echo "╰───────────────────────────────╯"
+echo "│    " fg.magenta t.bold "󰪫 DE/WM: " all.reset fg.white getDesktop " " (getBackend)
+echo "│    " fg.magenta t.bold " Uptime: " all.reset fg.white getUptime
+echo "│    " fg.magenta t.bold "󰧨 Primary: " all.reset fg.white getMonitor(0)
+echo "│    " fg.magenta t.bold " Shell: " all.reset fg.white getShell
+echo "╰──────────────────────────────────────────────╯"
 
 ascii = "/home/getUsername/.config/ffetch/ascii.txt"
-ascii_color = "fg.cyan"
+ascii_color = "fg.green"
+
 ```
 
 ```bash
@@ -272,86 +312,6 @@ echo "Shell: " getShell
 ascii = "/home/getUsername/.config/ffetch/ascii.txt"
 ascii_color = "fg.cyan"
 ```
-
----
-
-# 📚 **Use as Library**
-
-You can also use F-Fetch as a library in your Rust projects:
-
-## 📥 **Add to your project**
-
-```bash
-cargo add ffetch
-```
-
-Or add to your `Cargo.toml`:
-
-```toml
-[dependencies]
-ffetch = "0.5.5"
-```
-
-## 🛠️ **Example Usage**
-
-```rust
-use ffetch::*;
-
-fn main() {
-    // Get system information
-    let username = get_username();
-    let os_name = get_os_name();
-    let cpu_info = get_cpu();
-    let memory = get_memory();
-
-    println!("User: {}", username);
-    println!("OS: {}", os_name);
-    println!("CPU: {}", cpu_info);
-    println!("Memory: {} MB", memory);
-}
-```
-
----
-
-# ☢️ All Possible Problems and Solutions
-
-You're clearly not on Linux:
-
-```text
-you are not using linux
-```
-
-Failed to run uname really? Make sure uname exists:
-
-```text
-uname command error
-```
-
-Failed to run uptime seriously? Check if uptime is available:
-
-```text
-uptime command error
-```
-
-Couldn't detect your GPU with lspci. Are you using WSL or something else?
-
-```text
-Failed to execute lspci, not found.
-```
-
-Check your ~/.config/ffetch/ffetch.conf file and make sure ascii="" is set correctly:
-
-```text
-Failed to read file
-```
-
-Check the getMonitor() function in your configuration. If you're only using one monitor, either remove getMonitor(1) or add your third monitor.
-
-```text
-index out of bound
-```
-
-If the disk is not showing up, check getDisk() in the config and make sure it's using a valid mountpoint, like getDisk(/).
 
 ---
 
