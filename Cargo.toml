@@ -42,4 +42,3 @@ strip = "symbols"
 
 
 [dependencies]
-xrandr-parser = "0.3.0"

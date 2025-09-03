@@ -1,10 +1,10 @@
 use std::{
     env,
-    fs::{metadata, read_dir, read_link, read_to_string, File},
+    fs::{metadata, read, read_dir, read_link, read_to_string, File},
     io::{BufRead, BufReader},
+    path::Path,
     process::Command,
 };
-use xrandr_parser::Parser;
 
 /// Gets the Linux kernel version from `/proc/version`.
 ///
@@ -936,24 +936,138 @@ pub fn get_shell() -> String {
 /// // Output: Primary Monitor: HDMI-A-1 1920x1080 60 Hz *
 /// ```
 pub fn get_monitor(monitor_index: usize) -> String {
-    let mut trues = "";
-
-    let mut xrandr_parser_var = Parser::new();
-
-    xrandr_parser_var.parse().expect("Xrandr parser is failed");
-    let connectors = &xrandr_parser_var.connectors();
-    if connectors[monitor_index].primary {
-        trues = "*";
+    fn mm_to_inches(mm: u8) -> f32 {
+        (mm as f32) / 25.4
     }
 
-    let all_of_things = format!(
-        "{} {} {} Hz {}",
-        connectors[monitor_index].name,
-        &connectors[monitor_index].current_resolution.pretty(),
-        connectors[monitor_index].current_refresh_rate,
-        trues
-    );
-    all_of_things
+    fn parse_edid(edid_bytes: &[u8]) -> Option<(String, String, f32, f32, f32)> {
+        if edid_bytes.len() < 128 {
+            return None;
+        }
+
+        let width_mm = edid_bytes[21];
+        let height_mm = edid_bytes[22];
+
+        let mut model_name = "Unknown".to_string();
+        for i in (54..=126).step_by(18) {
+            if edid_bytes[i] == 0x00 && edid_bytes[i + 3] == 0xFC {
+                let name_bytes = &edid_bytes[i + 5..i + 18];
+                model_name = String::from_utf8_lossy(name_bytes)
+                    .trim_end_matches(char::from(10))
+                    .trim()
+                    .to_string();
+                break;
+            }
+        }
+
+        let dtd = &edid_bytes[54..72];
+        let pixel_clock = u16::from_le_bytes([dtd[0], dtd[1]]) as u32 * 10_000;
+
+        let h_active = ((dtd[2] as u16) + (((dtd[4] & 0xF0) as u16) << 4)) as u32;
+        let h_blank = ((dtd[3] as u16) + (((dtd[4] & 0x0F) as u16) << 8)) as u32;
+        let v_active = ((dtd[5] as u16) + (((dtd[7] & 0xF0) as u16) << 4)) as u32;
+        let v_blank = ((dtd[6] as u16) + (((dtd[7] & 0x0F) as u16) << 8)) as u32;
+
+        let h_total = h_active + h_blank;
+        let v_total = v_active + v_blank;
+
+        if h_total == 0 || v_total == 0 {
+            return None;
+        }
+
+        let refresh_rate = (pixel_clock as f64) / (h_total as f64 * v_total as f64);
+        let refresh_rate_rounded = (refresh_rate * 100.0).round() / 100.0;
+
+        Some((
+            model_name,
+            format!("{h_active}x{v_active}"),
+            refresh_rate_rounded as f32,
+            mm_to_inches(width_mm),
+            mm_to_inches(height_mm),
+        ))
+    }
+
+    let drm_dir = Path::new("/sys/class/drm");
+    let mut all_of_things = Vec::new();
+
+    let entries = match read_dir(drm_dir) {
+        Ok(e) => e,
+        Err(_) => {
+            all_of_things.push("Failed to read /sys/class/drm directory".to_string());
+            return all_of_things[monitor_index].clone();
+        }
+    };
+
+    for entry in entries {
+        let entry = match entry {
+            Ok(e) => e,
+            Err(_) => {
+                all_of_things.push("Failed to read drm directory entry".to_string());
+                continue;
+            }
+        };
+        let path = entry.path();
+        if !path.join("status").exists() {
+            continue;
+        }
+
+        let status = match read_to_string(path.join("status")) {
+            Ok(s) => s.trim().to_string(),
+            Err(_) => {
+                all_of_things.push(format!("Failed to read status for {}", path.display()));
+                continue;
+            }
+        };
+
+        if status != "connected" {
+            continue;
+        }
+
+        let name = path
+            .file_name()
+            .and_then(|n| n.to_str())
+            .unwrap_or("Unknown");
+        let connector = name.split_once('-').map(|(_, c)| c).unwrap_or(name);
+
+        let edid_path = path.join("edid");
+        if !edid_path.exists() {
+            all_of_things.push(format!("({connector}): Unknown (no EDID)"));
+            continue;
+        }
+
+        let edid_bytes = match read(edid_path) {
+            Ok(b) => b,
+            Err(_) => {
+                all_of_things.push(format!("Failed to read EDID for {connector}"));
+                continue;
+            }
+        };
+
+        if let Some((model, resolution, hz, width_in, height_in)) = parse_edid(&edid_bytes) {
+            let size_diag = ((width_in.powi(2) + height_in.powi(2)).sqrt() * 10.0).round() / 10.0;
+
+            let hz_str = if (hz - hz.round()).abs() < 0.01 {
+                format!("{hz:.0}")
+            } else {
+                format!("{hz:.2}")
+            };
+
+            let location = if connector.starts_with("eDP") {
+                "Internal"
+            } else {
+                "External"
+            };
+
+            let line =
+                format!("({model}): {resolution} @ {hz_str} Hz in {size_diag:.1}\" [{location}]");
+
+            all_of_things.push(line);
+        } else {
+            all_of_things.push(format!("({connector}): Failed to parse EDID"));
+        }
+    }
+
+    all_of_things[monitor_index].clone()
 }
 
 /// Gets the current terminal emulator name using `xprop`.

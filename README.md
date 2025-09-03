@@ -43,6 +43,12 @@ ffetch
 
 ---
 
+## Dependencies
+
+If u're using `getTerm`, u need to make sure xprop is installed.
+
+For GPU and disk information, I use standard Linux tools like lspci (from pciutils) and df (from coreutils).
+
 # F-Fetch Components List
 
 - `getUsername`  
