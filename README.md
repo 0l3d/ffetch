@@ -9,7 +9,7 @@ At its core, it works simply and the codebase is easy to understand. 💡
 | ⚙️ **Features**      | 📜 **Description**                                               |
 | -------------------- | ---------------------------------------------------------------- |
 | 🦀 **Rust**          | Written 100% in Rust                                             |
-| 🎨 **Flexibility**   | Highly flexible — customize the appearance as you wish           |
+| 🎨 **Flexibility**   | Highly flexible - customize the appearance as you wish           |
 | ⚡ **Efficiency**    | Despite flexibility, uses very little space and system resources |
 | 🔧 **Customization** | Offers a wide range of customization options                     |
 
