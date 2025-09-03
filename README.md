@@ -1,7 +1,7 @@
 # 🚀 **F-Fetch:** _Fast, Minimal & Rust-Powered System Fetcher_ 🦀✨
 
 F-Fetch is a **very fast**, **minimal** terminal system fetcher written **100% in Rust**.  
-It is **highly customizable** — allowing you to add your own syntax and integrate your own features.  
+It is **highly customizable** - allowing you to add your own syntax and integrate your own features.  
 At its core, it works simply and the codebase is easy to understand. 💡
 
 ---
