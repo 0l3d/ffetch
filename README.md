@@ -321,13 +321,13 @@ You're clearly not on Linux:
 you are not using linux
 ```
 
-Failed to run uname — really? Make sure uname exists:
+Failed to run uname really? Make sure uname exists:
 
 ```text
 uname command error
 ```
 
-Failed to run uptime — seriously? Check if uptime is available:
+Failed to run uptime seriously? Check if uptime is available:
 
 ```text
 uptime command error
