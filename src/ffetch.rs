@@ -574,8 +574,7 @@ pub fn get_cpu_arch() -> Result<String, Error> {
         .map_err(|e| Error::new(e.kind(), "Failed to execute 'uname -m' command"))?;
 
     if !output.status.success() {
-        return Err(Error::new(
-            ErrorKind::Other,
+        return Err(Error::other(
             "'uname -m' command exited with error",
         ));
     }
@@ -640,8 +639,7 @@ pub fn get_uptime() -> Result<String, Error> {
         .map_err(|e| Error::new(e.kind(), "Failed to execute 'uptime -p' command"))?;
 
     if !output.status.success() {
-        return Err(Error::new(
-            ErrorKind::Other,
+        return Err(Error::other(
             "'uptime -p' command exited with error",
         ));
     }
@@ -775,12 +773,11 @@ pub fn get_packages() -> Result<String, Error> {
             .map_err(|e| Error::new(e.kind(), "Failed to execute 'rpm -qa' command"))?;
 
         if !output.status.success() {
-            return Err(Error::new(ErrorKind::Other, "'rpm -qa' command failed"));
+            return Err(Error::other("'rpm -qa' command failed"));
         }
 
         if output.stdout.is_empty() {
-            return Err(Error::new(
-                ErrorKind::Other,
+            return Err(Error::other(
                 "'rpm -qa' returned empty output",
             ));
         }
@@ -810,13 +807,10 @@ pub fn get_packages() -> Result<String, Error> {
     let mut results = Vec::new();
 
     for (name, func) in backends {
-        match func() {
-            Ok(count) => {
-                if count > 0 {
-                    results.push(format!("{count} ({name})"));
-                }
+        if let Ok(count) = func() {
+            if count > 0 {
+                results.push(format!("{count} ({name})"));
             }
-            Err(_) => {}
         }
     }
 
