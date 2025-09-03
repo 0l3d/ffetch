@@ -1,7 +1,7 @@
 # Maintainer: 0l3d
 
 pkgname=ffetch-bin
-pkgver=0.2.17
+pkgver=0.2.18
 pkgrel=1
 pkgdesc='CLI tool to fetch system info.'
 url='https://github.com/0l3d/ffetch'
