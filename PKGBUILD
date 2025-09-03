@@ -9,7 +9,7 @@ license=('GPL3')
 arch=('x86_64')
 depends=('pciutils' 'xorg-xprop' 'coreutils')
 source=("$url/releases/download/v$pkgver/ffetch-v$pkgver-linux-x86_64.tar.gz")
-sha256sums=('8a5abcc4698f8823ac7c035da0ebec848512ee3e850709c9b24e67773c109b26')
+sha256sums=('57bc7c6dbcf9eb7e16283d75c6dfe91e6e7405370bc68d0ae02e4631222ab0f3')
 
 package() {
   tar -xzf "$srcdir/ffetch-v$pkgver-linux-x86_64.tar.gz" -C "$srcdir"
