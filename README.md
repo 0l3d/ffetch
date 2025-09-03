@@ -1,8 +1,8 @@
-# 🚀 **F-Fetch:** _Fast, Minimal & Rust-Powered System Fetcher_ 
+# 🚀 **F-Fetch:** _Fast, Minimal & Rust-Powered System Fetcher_
 
 F-Fetch is a **very fast**, **minimal** terminal system fetcher written **100% in Rust**.  
 It is **highly customizable** - allowing you to add your own syntax and integrate your own features.  
-At its core, it works simply and the codebase is easy to understand. 
+At its core, it works simply and the codebase is easy to understand.
 
 ---
 
@@ -40,7 +40,9 @@ bash <(curl -s https://raw.githubusercontent.com/0l3d/ffetch/master/install.sh)
 ```bash
 ffetch
 ```
+
 ---
+
 # 📚 **Use as Library**
 
 You can also use F-Fetch as a library in your Rust projects:
@@ -82,12 +84,13 @@ fn main() {
 ## Dependencies
 
 If u're using `getTerm`, u need to make sure xprop is installed.
+If `getMonitor` fails, it uses `xrandr`.
 
 For GPU and disk information, I use standard Linux tools like lspci (from pciutils) and df (from coreutils).
 
 # F-Fetch Configuration & Examples
 
-## F-Fetch Components List 
+## F-Fetch Components List
 
 - `getUsername`  
   Returns the current **Username**.
@@ -250,7 +253,7 @@ echo "│    " fg.white t.bold " Hostname: " all.reset fg.green getHostname
 echo "│    " fg.white t.bold " Packages: " all.reset fg.green getPackages
 echo "│    " fg.white t.bold " Locale: " all.reset fg.green getLocale
 echo "│    " fg.white t.bold " Init: " all.reset fg.green getInit
-echo "│    " 
+echo "│    "
 echo "│  " t.underline fg.bright_green "󰋊 Hardware Information :"
 echo "│    "
 echo "│    " fg.yellow t.bold " CPU: " all.reset fg.white getCpu

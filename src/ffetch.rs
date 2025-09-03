@@ -1160,6 +1160,99 @@ pub fn get_monitor(monitor_index: usize) -> String {
         ))
     }
 
+    fn parse_xrandr_monitors() -> Vec<String> {
+        let output = Command::new("xrandr")
+            .arg("--query")
+            .output()
+            .expect("Failed to execute xrandr");
+
+        if !output.status.success() {
+            return vec!["Failed to run xrandr".to_string()];
+        }
+
+        let stdout = String::from_utf8_lossy(&output.stdout);
+        let mut lines = stdout.lines();
+
+        let mut results = Vec::new();
+
+        while let Some(line) = lines.next() {
+            if line.contains(" connected") {
+                let parts: Vec<&str> = line.split_whitespace().collect();
+                let connector_full = parts[0];
+                let resolution_part = parts
+                    .iter()
+                    .find(|s| s.contains('+') && s.contains('x'))
+                    .unwrap_or(&"Unknown");
+                let connector_short = connector_full.split('-').next().unwrap_or("Unknown");
+                let location = if connector_full.starts_with("eDP") {
+                    "Internal"
+                } else {
+                    "External"
+                };
+
+                let resolution = resolution_part.split('+').next().unwrap_or("Unknown");
+
+                let mut width_mm = 0.0;
+                let mut height_mm = 0.0;
+
+                for i in 0..parts.len() {
+                    if parts[i].ends_with("mm") {
+                        if width_mm == 0.0 {
+                            width_mm = parts[i]
+                                .trim_end_matches("mm")
+                                .parse::<f32>()
+                                .unwrap_or(0.0);
+                        } else if height_mm == 0.0 {
+                            height_mm = parts[i]
+                                .trim_end_matches("mm")
+                                .parse::<f32>()
+                                .unwrap_or(0.0);
+                            break;
+                        }
+                    }
+                }
+
+                let mut refresh_hz = "??".to_string();
+
+                while let Some(mode_line) = lines.next() {
+                    if mode_line.trim().is_empty() || mode_line.contains("connected") {
+                        break;
+                    }
+
+                    let mode_parts: Vec<&str> = mode_line.trim().split_whitespace().collect();
+                    if mode_parts.len() >= 2 && mode_parts[0] == resolution {
+                        refresh_hz = mode_parts[1]
+                            .trim_end_matches(|c: char| c == '*' || c == '+')
+                            .to_string();
+                        break;
+                    }
+                }
+
+                let width_in = width_mm / 25.4;
+                let height_in = height_mm / 25.4;
+                let diagonal_in = if width_in > 0.0 && height_in > 0.0 {
+                    ((width_in.powi(2) + height_in.powi(2)).sqrt() * 10.0).round() / 10.0
+                } else {
+                    0.0
+                };
+
+                let line = if diagonal_in > 0.0 {
+                    format!(
+                    "({connector_short}): {resolution} @ {refresh_hz} Hz in {diagonal_in:.1}\" [{location}]"
+                )
+                } else {
+                    format!(
+                    "({connector_short}): {resolution} @ {refresh_hz} Hz [No size] [{location}]"
+                )
+                };
+
+                results.push(line);
+            }
+        }
+
+        results
+    }
+
     let drm_dir = Path::new("/sys/class/drm");
     let mut all_of_things = Vec::new();
 
@@ -1236,7 +1329,7 @@ pub fn get_monitor(monitor_index: usize) -> String {
 
             all_of_things.push(line);
         } else {
-            all_of_things.push(format!("({connector}): Failed to parse EDID"));
+            all_of_things.push(parse_xrandr_monitors()[monitor_index].to_string());
         }
     }
 
