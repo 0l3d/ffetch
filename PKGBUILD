@@ -7,7 +7,7 @@ pkgdesc='CLI tool to fetch system info.'
 url='https://github.com/0l3d/ffetch'
 license=('GPL3')
 arch=('x86_64')
-depends=('pciutils' 'xorg-xprop' 'xrandr' 'coreutils')
+depends=('pciutils' 'xorg-xprop' 'coreutils')
 source=("$url/releases/download/v$pkgver/ffetch-v$pkgver-linux-x86_64.tar.gz")
 sha256sums=('66f55bbce12f5a4c468a57c3d240c36bdad7d85fdf101090634699886515306d')
 
