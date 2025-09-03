@@ -195,20 +195,58 @@ fn parser(tokens: Vec<String>) -> String {
 
         match token.as_str() {
             "getUsername" => return_val.push_str(&ffetch::get_username()),
-            "getBoardVendor" => return_val.push_str(&ffetch::get_board_vendor()),
-            "getBoardName" => return_val.push_str(&ffetch::get_board_name()),
-            "getBoardVersion" => return_val.push_str(&ffetch::get_board_ver()),
-            "getOsName" => return_val.push_str(&ffetch::get_os_name()),
-            "getArch" => return_val.push_str(&ffetch::get_cpu_arch()),
-            "getKernel" => return_val.push_str(&ffetch::get_kernel_version()),
-            "getCpu" => return_val.push_str(&ffetch::get_cpu_name()),
-            "getMemory" => return_val.push_str(&ffetch::get_memory()),
-            "getHostname" => return_val.push_str(&ffetch::get_hostname()),
+            "getBoardVendor" => match ffetch::get_board_vendor() {
+                Ok(s) => return_val.push_str(&s),
+                Err(e) => return_val.push_str(&format!("Error: {e}")),
+            },
+            "getBoardName" => match ffetch::get_board_name() {
+                Ok(s) => return_val.push_str(&s),
+                Err(e) => return_val.push_str(&format!("Error: {e}")),
+            },
+            "getBoardVersion" => match ffetch::get_board_ver() {
+                Ok(s) => return_val.push_str(&s),
+                Err(e) => return_val.push_str(&format!("Error: {e}")),
+            },
+            "getOsName" => match ffetch::get_os_name() {
+                Ok(s) => return_val.push_str(&s),
+                Err(e) => return_val.push_str(&format!("Error: {e}")),
+            },
+            "getArch" => match ffetch::get_cpu_arch() {
+                Ok(s) => return_val.push_str(&s),
+                Err(e) => return_val.push_str(&format!("Error: {e}")),
+            },
+            "getKernel" => match ffetch::get_kernel_version() {
+                Ok(s) => return_val.push_str(&s),
+                Err(e) => return_val.push_str(&format!("Error: {e}")),
+            },
+            "getCpu" => match ffetch::get_cpu_name() {
+                Ok(s) => return_val.push_str(&s),
+                Err(e) => return_val.push_str(&format!("Error: {e}")),
+            },
+            "getMemory" => match ffetch::get_memory() {
+                Ok(s) => return_val.push_str(&s),
+                Err(e) => return_val.push_str(&format!("Error: {e}")),
+            },
+            "getHostname" => match ffetch::get_hostname() {
+                Ok(s) => return_val.push_str(&s),
+                Err(e) => return_val.push_str(&format!("Error: {e}")),
+            },
             "getDesktop" => return_val.push_str(&ffetch::get_desktop_env()),
             "getBackend" => return_val.push_str(&ffetch::get_compositor()),
             "getPlatform" => return_val.push_str(&ffetch::get_platform()),
-            "getUptime" => return_val.push_str(&ffetch::get_uptime()),
-            "getPackages" => return_val.push_str(&ffetch::get_packages()),
+            "getUptime" => match ffetch::get_uptime() {
+                Ok(s) => return_val.push_str(&s),
+                Err(e) => return_val.push_str(&format!("Error: {e}")),
+            },
+            "getPackages" => match ffetch::get_packages() {
+                Ok(s) => return_val.push_str(&s),
+                Err(e) => return_val.push_str(&format!("Error: {e}")),
+            },
+            "getInit" => match ffetch::get_init_system() {
+                Ok(s) => return_val.push_str(&s),
+                Err(e) => return_val.push_str(&format!("Error: {e}")),
+            },
+
             "getGpu" => return_val.push_str(&ffetch::get_gpu()),
             "getMGpu" => return_val.push_str(&ffetch::get_m_gpu()),
             "getShell" => return_val.push_str(&ffetch::get_shell()),
@@ -216,7 +254,6 @@ fn parser(tokens: Vec<String>) -> String {
             "getTerm" => return_val.push_str(&ffetch::get_terminal()),
             "getGTK" => return_val.push_str(&ffetch::gtk_theme()),
             "getQT" => return_val.push_str(&ffetch::qt_theme()),
-            "getInit" => return_val.push_str(&ffetch::get_init_system()),
             "getMonitor" => {
                 if i + 3 < tokens.len() && tokens[i + 1] == "(" && tokens[i + 3] == ")" {
                     let argstr = &tokens[i + 2];

@@ -1,7 +1,7 @@
 use std::{
     env,
     fs::{metadata, read, read_dir, read_link, read_to_string, File},
-    io::{BufRead, BufReader},
+    io::{BufRead, BufReader, Error, ErrorKind},
     path::Path,
     process::Command,
 };
@@ -28,17 +28,29 @@ use std::{
 /// println!("Kernel version: {}", kernel);
 /// // Output: Kernel version: 6.1.0-18-amd64
 /// ```
-pub fn get_kernel_version() -> String {
-    let mut kernel_result: Vec<String> = Vec::new();
-    for line in read_to_string("/proc/version")
-        .expect("you are not using linux (/proc/version is empty)")
+pub fn get_kernel_version() -> Result<String, Error> {
+    let contents = read_to_string("/proc/version").map_err(|e| {
+        Error::new(
+            e.kind(),
+            "Failed to read /proc/version. Are you running Linux?",
+        )
+    })?;
+
+    let first_line = contents
         .lines()
-    {
-        kernel_result.push(line.to_string());
+        .next()
+        .ok_or_else(|| Error::new(ErrorKind::InvalidData, "/proc/version appears to be empty."))?;
+
+    let parts: Vec<&str> = first_line.split_whitespace().collect();
+
+    if parts.len() < 3 {
+        return Err(Error::new(
+            ErrorKind::InvalidData,
+            "Unexpected format in /proc/version.",
+        ));
     }
 
-    let kernel_result_full: Vec<_> = kernel_result[0].split(" ").collect();
-    kernel_result_full[2].to_string()
+    Ok(parts[2].to_string())
 }
 
 /// Gets the motherboard vendor from `/sys/class/dmi/id/board_vendor`.
@@ -65,11 +77,19 @@ pub fn get_kernel_version() -> String {
 /// println!("Motherboard vendor: {}", vendor);
 /// // Output: Motherboard vendor: Micro-Star International Co., Ltd.
 /// ```
-pub fn get_board_vendor() -> String {
-    read_to_string("/sys/class/dmi/id/board_vendor")
-        .expect("board_vendor is not found on your filesystem.")
-        .trim()
-        .to_string()
+pub fn get_board_vendor() -> Result<String, Error> {
+    let content = read_to_string("/sys/class/dmi/id/board_vendor")
+        .map_err(|e| Error::new(e.kind(), "Failed to read /sys/class/dmi/id/board_vendor. File may not exist or permission denied."))?;
+
+    let trimmed = content.trim();
+    if trimmed.is_empty() {
+        return Err(Error::new(
+            ErrorKind::InvalidData,
+            "The board_vendor file is empty.",
+        ));
+    }
+
+    Ok(trimmed.to_string())
 }
 
 /// Gets the motherboard name (model) from `/sys/class/dmi/id/board_name`.
@@ -96,11 +116,23 @@ pub fn get_board_vendor() -> String {
 /// println!("Motherboard name: {}", name);
 /// // Output: Motherboard name: MS-7D95
 /// ```
-pub fn get_board_name() -> String {
-    read_to_string("/sys/class/dmi/id/board_name")
-        .expect("board_name is not found on your filesystem.")
-        .trim()
-        .to_string()
+pub fn get_board_name() -> Result<String, Error> {
+    let content = read_to_string("/sys/class/dmi/id/board_name").map_err(|e| {
+        Error::new(
+            e.kind(),
+            "Failed to read /sys/class/dmi/id/board_name. File may not exist or permission denied.",
+        )
+    })?;
+
+    let trimmed = content.trim();
+    if trimmed.is_empty() {
+        return Err(Error::new(
+            ErrorKind::InvalidData,
+            "The board_name file is empty.",
+        ));
+    }
+
+    Ok(trimmed.to_string())
 }
 
 /// Gets the motherboard version from `/sys/class/dmi/id/board_version`.
@@ -127,11 +159,19 @@ pub fn get_board_name() -> String {
 /// println!("Motherboard version: {}", version);
 /// // Output: Motherboard version: 1.0
 /// ```
-pub fn get_board_ver() -> String {
-    read_to_string("/sys/class/dmi/id/board_version")
-        .expect("board_version is not found on your filesystem.")
-        .trim()
-        .to_string()
+pub fn get_board_ver() -> Result<String, Error> {
+    let content = read_to_string("/sys/class/dmi/id/board_version")
+        .map_err(|e| Error::new(e.kind(), "Failed to read /sys/class/dmi/id/board_version. File may not exist or permission denied."))?;
+
+    let trimmed = content.trim();
+    if trimmed.is_empty() {
+        return Err(Error::new(
+            ErrorKind::InvalidData,
+            "The board_version file is empty.",
+        ));
+    }
+
+    Ok(trimmed.to_string())
 }
 
 /// Gets the system init system
@@ -151,19 +191,25 @@ pub fn get_board_ver() -> String {
 /// println!("Init: {}", init_system);
 /// // Output: Init: runit-init
 /// ```
-pub fn get_init_system() -> String {
-    let path = read_link("/sbin/init").unwrap();
-    let init: &str = path.to_str().unwrap();
+pub fn get_init_system() -> Result<String, Error> {
+    let path = read_link("/sbin/init")
+        .map_err(|e| Error::new(e.kind(), "Failed to resolve /sbin/init symlink."))?;
+
+    let init = path
+        .to_str()
+        .ok_or_else(|| Error::new(ErrorKind::InvalidData, "Symlink target is not valid UTF-8."))?;
 
     if metadata("/sbin/openrc").is_ok() {
-        return "openrc".to_string();
+        return Ok("openrc".to_string());
     }
 
-    match init {
-        "runit-init" => "runit".to_string(),
-        "/lib/systemd/systemd" => "systemd".to_string(),
-        _ => init.to_string(),
-    }
+    let init_system = match init {
+        "runit-init" => "runit",
+        "/lib/systemd/systemd" => "systemd",
+        _ => init,
+    };
+
+    Ok(init_system.to_string())
 }
 
 /// Gets the system locale from environment variables.
@@ -272,18 +318,29 @@ pub fn qt_theme() -> String {
 /// println!("CPU: {}", cpu);
 /// // Output: CPU: Intel(R) Core(TM) i7-8750H CPU @ 2.20GHz
 /// ```
-pub fn get_cpu_name() -> String {
-    for line in read_to_string("/proc/cpuinfo")
-        .expect("you are not using linux (/proc/cpuinfo is empty)")
-        .lines()
-    {
+pub fn get_cpu_name() -> Result<String, Error> {
+    let contents = read_to_string("/proc/cpuinfo").map_err(|e| {
+        Error::new(
+            e.kind(),
+            "Failed to read /proc/cpuinfo. Are you running Linux?",
+        )
+    })?;
+
+    for line in contents.lines() {
         if line.starts_with("model name") {
-            if let Some(cpu) = line.split(":").nth(1) {
-                return cpu.trim().to_string();
+            if let Some(cpu) = line.split(':').nth(1) {
+                let name = cpu.trim();
+                if !name.is_empty() {
+                    return Ok(name.to_string());
+                }
             }
         }
     }
-    "Unknown CPU".to_string()
+
+    Err(Error::new(
+        ErrorKind::NotFound,
+        "Could not find 'model name' in /proc/cpuinfo.",
+    ))
 }
 
 /// Gets memory usage information from `/proc/meminfo`.
@@ -308,32 +365,58 @@ pub fn get_cpu_name() -> String {
 /// println!("Memory: {} MB", memory);
 /// // Output: Memory: 8192 / 16384 MB
 /// ```
-pub fn get_memory() -> String {
-    let mut total_memory: u64 = 0;
-    let mut free_memory: u64 = 0;
-    for line in read_to_string("/proc/meminfo")
-        .expect("meminfo read error")
-        .lines()
-    {
-        let spline: Vec<&str> = line.split(":").collect();
-        match spline[0] {
-            "MemTotal" => {
-                let total_memory_split: Vec<_> = spline[1].split("kB").collect();
-                let total_memory_trim = total_memory_split[0].trim();
-                let _total_memory_asint: u64 = total_memory_trim.parse().unwrap();
-                total_memory = _total_memory_asint / 1024;
+pub fn get_memory() -> Result<String, Error> {
+    let contents = read_to_string("/proc/meminfo")
+        .map_err(|e| Error::new(e.kind(), "Failed to read /proc/meminfo."))?;
+
+    let mut total_memory: Option<u64> = None;
+    let mut free_memory: Option<u64> = None;
+
+    for line in contents.lines() {
+        let parts: Vec<&str> = line.split(':').collect();
+        if parts.len() != 2 {
+            continue;
+        }
+
+        let key = parts[0].trim();
+        let value_part = parts[1].trim();
+
+        if key == "MemTotal" {
+            if let Some(value_kb) = value_part.strip_suffix("kB") {
+                if let Ok(val) = value_kb.trim().parse::<u64>() {
+                    total_memory = Some(val / 1024); // Convert to MB
+                }
             }
-            "MemAvailable" => {
-                let free_memory_split: Vec<_> = spline[1].split("kB").collect();
-                let free_memory_trim = free_memory_split[0].trim();
-                let _free_memory_asint: u64 = free_memory_trim.parse().unwrap();
-                free_memory = _free_memory_asint / 1024;
+        }
+
+        if key == "MemAvailable" {
+            if let Some(value_kb) = value_part.strip_suffix("kB") {
+                if let Ok(val) = value_kb.trim().parse::<u64>() {
+                    free_memory = Some(val / 1024); // Convert to MB
+                }
             }
-            _ => {}
+        }
+
+        if total_memory.is_some() && free_memory.is_some() {
+            break;
         }
     }
-    let memory_usage = total_memory - free_memory;
-    format!("{memory_usage} / {total_memory}")
+
+    let total = total_memory.ok_or_else(|| {
+        Error::new(
+            ErrorKind::InvalidData,
+            "Failed to find MemTotal in /proc/meminfo.",
+        )
+    })?;
+    let free = free_memory.ok_or_else(|| {
+        Error::new(
+            ErrorKind::InvalidData,
+            "Failed to find MemAvailable in /proc/meminfo.",
+        )
+    })?;
+
+    let used = total - free;
+    Ok(format!("{used} / {total} MB"))
 }
 
 /// Gets the operating system name from `/etc/os-release`.
@@ -357,19 +440,33 @@ pub fn get_memory() -> String {
 /// println!("OS: {}", os);
 /// // Output: OS: Ubuntu
 /// ```
-pub fn get_os_name() -> String {
-    for line in read_to_string("/etc/os-release")
-        .expect("you are not using linux (/etc/os-release is empty)")
-        .lines()
-    {
+pub fn get_os_name() -> Result<String, Error> {
+    let contents = read_to_string("/etc/os-release").map_err(|e| {
+        Error::new(
+            e.kind(),
+            "Failed to read /etc/os-release. Are you running Linux?",
+        )
+    })?;
+
+    for line in contents.lines() {
         if line.starts_with("NAME=") {
-            return line
-                .trim_start_matches("NAME=")
-                .trim_matches('"')
-                .to_string();
+            let name = line.trim_start_matches("NAME=").trim_matches('"').trim();
+
+            if name.is_empty() {
+                return Err(Error::new(
+                    ErrorKind::InvalidData,
+                    "OS name is empty in /etc/os-release.",
+                ));
+            }
+
+            return Ok(name.to_string());
         }
     }
-    "Unknown OS".to_string()
+
+    Err(Error::new(
+        ErrorKind::NotFound,
+        "OS name (NAME=) not found in /etc/os-release.",
+    ))
 }
 
 /// Gets the system hostname from `/etc/hostname`.
@@ -391,16 +488,20 @@ pub fn get_os_name() -> String {
 /// println!("Hostname: {}", hostname);
 /// // Output: Hostname: my-computer
 /// ```
-pub fn get_hostname() -> String {
-    let mut hostname_result: Vec<String> = Vec::new();
+pub fn get_hostname() -> Result<String, Error> {
+    let contents = read_to_string("/etc/hostname").map_err(|e| {
+        Error::new(
+            e.kind(),
+            "Failed to read /etc/hostname. Are you running Linux?",
+        )
+    })?;
 
-    for line in read_to_string("/etc/hostname")
-        .expect("you are not using linux (/etc/hostname is empty)")
+    let first_line = contents
         .lines()
-    {
-        hostname_result.push(line.to_string());
-    }
-    hostname_result[0].to_string()
+        .next()
+        .ok_or_else(|| Error::new(ErrorKind::InvalidData, "/etc/hostname is empty."))?;
+
+    Ok(first_line.to_string())
 }
 
 /// Gets the desktop environment name from environment variables.
@@ -466,16 +567,30 @@ pub fn get_compositor() -> String {
 /// println!("Architecture: {}", arch);
 /// // Output: Architecture: x86_64
 /// ```
-pub fn get_cpu_arch() -> String {
+pub fn get_cpu_arch() -> Result<String, Error> {
     let output = Command::new("uname")
         .arg("-m")
         .output()
-        .expect("uname command error");
+        .map_err(|e| Error::new(e.kind(), "Failed to execute 'uname -m' command"))?;
 
-    String::from_utf8(output.stdout)
-        .expect("UTF-8 error")
+    if !output.status.success() {
+        return Err(Error::new(
+            ErrorKind::Other,
+            "'uname -m' command exited with error",
+        ));
+    }
+
+    let arch = String::from_utf8(output.stdout)
+        .map_err(|_| {
+            Error::new(
+                ErrorKind::InvalidData,
+                "Failed to parse output of 'uname -m' as UTF-8",
+            )
+        })?
         .trim()
-        .to_string()
+        .to_string();
+
+    Ok(arch)
 }
 
 /// Gets the platform name.
@@ -518,15 +633,27 @@ pub fn get_platform() -> String {
 /// println!("Uptime: {}", uptime);
 /// // Output: Uptime: 2 hours, 30 minutes
 /// ```
-pub fn get_uptime() -> String {
+pub fn get_uptime() -> Result<String, Error> {
     let output = Command::new("uptime")
         .arg("-p")
         .output()
-        .expect("uptime command error");
+        .map_err(|e| Error::new(e.kind(), "Failed to execute 'uptime -p' command"))?;
 
-    let stdout = String::from_utf8(output.stdout).expect("uptime UTF-8 parse failed");
+    if !output.status.success() {
+        return Err(Error::new(
+            ErrorKind::Other,
+            "'uptime -p' command exited with error",
+        ));
+    }
 
-    stdout.trim_start_matches("up ").trim().to_string()
+    let stdout = String::from_utf8(output.stdout).map_err(|_| {
+        Error::new(
+            ErrorKind::InvalidData,
+            "Failed to parse output of 'uptime -p' as UTF-8",
+        )
+    })?;
+
+    Ok(stdout.trim_start_matches("up ").trim().to_string())
 }
 
 /// Gets the number of installed packages from various package managers.
@@ -552,79 +679,126 @@ pub fn get_uptime() -> String {
 /// println!("Packages: {}", packages);
 /// // Output: Packages: 1234 (apt-get) 56 (flatpak)
 /// ```
-pub fn get_packages() -> String {
-    let mut res = Vec::new();
-    fn count_emerge() -> Option<usize> {
+pub fn get_packages() -> Result<String, Error> {
+    fn count_emerge() -> Result<usize, Error> {
         let mut count = 0;
-        for entry in read_dir("/var/db/pkg").ok()? {
-            let entry = entry.ok()?;
+        let entries = read_dir("/var/db/pkg")
+            .map_err(|e| Error::new(e.kind(), "Failed to read /var/db/pkg directory"))?;
+
+        for entry in entries {
+            let entry =
+                entry.map_err(|e| Error::new(e.kind(), "Failed to read entry in /var/db/pkg"))?;
             if entry.path().is_dir() {
-                for pkg in read_dir(entry.path()).ok()? {
-                    if pkg.ok()?.path().is_dir() {
+                let pkgs = read_dir(entry.path()).map_err(|e| {
+                    Error::new(
+                        e.kind(),
+                        "Failed to read package directory under /var/db/pkg",
+                    )
+                })?;
+                for pkg in pkgs {
+                    let pkg =
+                        pkg.map_err(|e| Error::new(e.kind(), "Failed to read package entry"))?;
+                    if pkg.path().is_dir() {
                         count += 1;
                     }
                 }
             }
         }
-        Some(count)
+        Ok(count)
     }
 
-    fn count_flatpak() -> Option<usize> {
-        let apps = read_dir("/var/lib/flatpak/app").ok()?.count();
-        let runtimes = read_dir("/var/lib/flatpak/runtime").ok()?.count();
-        Some(apps + runtimes)
+    fn count_flatpak() -> Result<usize, Error> {
+        let apps = read_dir("/var/lib/flatpak/app")
+            .map_err(|e| Error::new(e.kind(), "Failed to read /var/lib/flatpak/app"))?
+            .count();
+
+        let runtimes = read_dir("/var/lib/flatpak/runtime")
+            .map_err(|e| Error::new(e.kind(), "Failed to read /var/lib/flatpak/runtime"))?
+            .count();
+
+        Ok(apps + runtimes)
     }
 
-    fn count_dpkg() -> Option<usize> {
-        let file = File::open("/var/lib/dpkg/status").ok()?;
+    fn count_dpkg() -> Result<usize, Error> {
+        let file = File::open("/var/lib/dpkg/status")
+            .map_err(|e| Error::new(e.kind(), "Failed to open /var/lib/dpkg/status"))?;
         let reader = BufReader::new(file);
+
         let count = reader
             .lines()
             .filter_map(|l| l.ok())
             .filter(|l| l.starts_with("Package: "))
             .count();
-        Some(count)
+
+        Ok(count)
     }
 
-    fn count_pacman() -> Option<usize> {
-        Some(read_dir("/var/lib/pacman/local").ok()?.count())
+    fn count_pacman() -> Result<usize, Error> {
+        let count = read_dir("/var/lib/pacman/local")
+            .map_err(|e| Error::new(e.kind(), "Failed to read /var/lib/pacman/local"))?
+            .count();
+
+        Ok(count)
     }
 
-    fn count_nix() -> Option<usize> {
-        Some(read_dir("/nix/store").ok()?.count())
+    fn count_nix() -> Result<usize, Error> {
+        let count = read_dir("/nix/store")
+            .map_err(|e| Error::new(e.kind(), "Failed to read /nix/store"))?
+            .count();
+
+        Ok(count)
     }
 
-    fn count_xbps() -> Option<usize> {
+    fn count_xbps() -> Result<usize, Error> {
         let path = "/var/db/xbps";
-        let count = read_dir(path)
-            .ok()?
-            .filter(|e| {
-                e.as_ref()
-                    .ok()
-                    .map(|x| {
-                        x.path()
-                            .extension()
-                            .map(|ext| ext == "plist")
-                            .unwrap_or(false)
-                    })
+        let entries =
+            read_dir(path).map_err(|e| Error::new(e.kind(), format!("Failed to read {}", path)))?;
+
+        let count = entries
+            .filter_map(|e| e.ok())
+            .filter(|entry| {
+                entry
+                    .path()
+                    .extension()
+                    .map(|ext| ext == "plist")
                     .unwrap_or(false)
             })
             .count();
-        Some(count)
+
+        Ok(count)
     }
 
-    fn count_rpm() -> Option<usize> {
-        let output = Command::new("rpm").arg("-qa").output().ok()?;
+    fn count_rpm() -> Result<usize, Error> {
+        let output = Command::new("rpm")
+            .arg("-qa")
+            .output()
+            .map_err(|e| Error::new(e.kind(), "Failed to execute 'rpm -qa' command"))?;
 
-        if !output.stdout.is_empty() {
-            let count = String::from_utf8_lossy(&output.stdout).lines().count();
-            Some(count)
-        } else {
-            None
+        if !output.status.success() {
+            return Err(Error::new(ErrorKind::Other, "'rpm -qa' command failed"));
         }
+
+        if output.stdout.is_empty() {
+            return Err(Error::new(
+                ErrorKind::Other,
+                "'rpm -qa' returned empty output",
+            ));
+        }
+
+        let count = String::from_utf8(output.stdout)
+            .map_err(|_| {
+                Error::new(
+                    ErrorKind::InvalidData,
+                    "Failed to parse rpm output as UTF-8",
+                )
+            })?
+            .lines()
+            .count();
+
+        Ok(count)
     }
 
-    let backends: &[(&str, fn() -> Option<usize>)] = &[
+    let backends: &[(&str, fn() -> Result<usize, Error>)] = &[
         ("emerge", count_emerge),
         ("flatpak", count_flatpak),
         ("apt-get", count_dpkg),
@@ -633,19 +807,30 @@ pub fn get_packages() -> String {
         ("xbps", count_xbps),
     ];
 
+    let mut results = Vec::new();
+
     for (name, func) in backends {
-        if let Some(count) = func() {
-            res.push(format!("{count} ({name})"));
+        match func() {
+            Ok(count) => {
+                if count > 0 {
+                    results.push(format!("{count} ({name})"));
+                }
+            }
+            Err(_) => {}
         }
     }
 
     let rpm_managers = ["dnf", "yum", "zypper"];
-    for name in rpm_managers.iter() {
-        if let Some(count) = count_rpm() {
-            res.push(format!("{count} ({name})"));
+    match count_rpm() {
+        Ok(count) if count > 0 => {
+            for name in &rpm_managers {
+                results.push(format!("{count} ({name})"));
+            }
         }
+        _ => {}
     }
-    res.join(" ")
+
+    Ok(results.join(" "))
 }
 
 /// Gets the primary GPU information using `lspci`.
