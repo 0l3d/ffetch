@@ -574,9 +574,7 @@ pub fn get_cpu_arch() -> Result<String, Error> {
         .map_err(|e| Error::new(e.kind(), "Failed to execute 'uname -m' command"))?;
 
     if !output.status.success() {
-        return Err(Error::other(
-            "'uname -m' command exited with error",
-        ));
+        return Err(Error::other("'uname -m' command exited with error"));
     }
 
     let arch = String::from_utf8(output.stdout)
@@ -639,9 +637,7 @@ pub fn get_uptime() -> Result<String, Error> {
         .map_err(|e| Error::new(e.kind(), "Failed to execute 'uptime -p' command"))?;
 
     if !output.status.success() {
-        return Err(Error::other(
-            "'uptime -p' command exited with error",
-        ));
+        return Err(Error::other("'uptime -p' command exited with error"));
     }
 
     let stdout = String::from_utf8(output.stdout).map_err(|_| {
@@ -777,9 +773,7 @@ pub fn get_packages() -> Result<String, Error> {
         }
 
         if output.stdout.is_empty() {
-            return Err(Error::other(
-                "'rpm -qa' returned empty output",
-            ));
+            return Err(Error::other("'rpm -qa' returned empty output"));
         }
 
         let count = String::from_utf8(output.stdout)
@@ -1128,7 +1122,7 @@ pub fn get_monitor(monitor_index: usize) -> String {
         let height_mm = edid_bytes[22];
 
         let mut model_name = "Unknown".to_string();
-        for i in (54..=126).step_by(18) {
+        for i in (54..=125).step_by(18) {
             if edid_bytes[i] == 0x00 && edid_bytes[i + 3] == 0xFC {
                 let name_bytes = &edid_bytes[i + 5..i + 18];
                 model_name = String::from_utf8_lossy(name_bytes)
