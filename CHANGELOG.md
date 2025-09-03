@@ -1,5 +1,5 @@
-# [0.2.17]
+# [0.2.18]
 
 ### What's Changed?
 
-- Reduce Deps
+- Bug fixes.
