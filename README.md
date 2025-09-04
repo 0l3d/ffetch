@@ -21,17 +21,32 @@ At its core, it works simply and the codebase is easy to understand.
 
 # ⚙️ **Installation & Configuration**
 
+## For Arch Linux
+
+### 📦 Install via AUR
+
+```bash
+paru -S ffetch
+paru -S ffetch-git
+```
+
+### Install via `makepkg`
+
+```bash
+git clone --depth=1 https://github.com/0l3d/ffetch.git
+cd ffetch
+makepkg -si
+```
+
 ## 📦 **Install via Cargo**
 
 ```bash
-# Install from crates.io
 cargo install ffetch
 ```
 
 ## 🚀 **Installation Script**
 
 ```bash
-# Run Installation Script
 bash <(curl -s https://raw.githubusercontent.com/0l3d/ffetch/master/install.sh)
 ```
 
@@ -45,39 +60,10 @@ ffetch
 
 # 📚 **Use as Library**
 
-You can also use F-Fetch as a library in your Rust projects:
+You can also use F-Fetch as a library in your Rust projects.
 
-## 📥 **Add to your project**
-
-```bash
-cargo add ffetch
-```
-
-Or add to your `Cargo.toml`:
-
-```toml
-[dependencies]
-ffetch = "0.5.5"
-```
-
-## 🛠️ **Example Usage**
-
-```rust
-use ffetch::*;
-
-fn main() {
-    // Get system information
-    let username = get_username();
-    let os_name = get_os_name();
-    let cpu_info = get_cpu();
-    let memory = get_memory();
-
-    println!("User: {}", username);
-    println!("OS: {}", os_name);
-    println!("CPU: {}", cpu_info);
-    println!("Memory: {} MB", memory);
-}
-```
+Check: [crates.io/ffetch](https://crates.io/crates/ffetch)  
+Docs: [docs.rs/ffetch](https://docs.rs/ffetch/latest/ffetch/)
 
 ---
 
