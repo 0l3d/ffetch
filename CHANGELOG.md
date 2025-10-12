@@ -1,5 +1,6 @@
-# [0.2.19]
+# [0.2.20]
 
 ### What's Changed?
 
 - Bug fixes.
+- Colored Ascii Support.
