@@ -1,18 +1,18 @@
-                __.;=====;.__                    
-            _.=+==++=++=+=+===;.                 
-             -=+++=+===+=+=+++++=_               
-        .     -=:``     `--==+=++==.             
-       _vi,    `            --+=++++:            
-      .uvnvi.       _._       -==+==+.           
-     .vvnvnI`    .;==|==;.     :|=||=|.          
-+QmQQmpvvnv; _yYsyQQWUUQQQm #QmQ#:QQQWUV$QQm.    
- -QQWQWpvvowZ?.wQQQE==<QWWQ/QWQW.QQWW(: jQWQE    
-  -$QQQQmmU'  jQQQ@+=<QWQQ)mQQQ.mQQQC+;jWQQ@'    
-   -$WQ8YnI:   QWQQwgQQWV`mWQQ.jQWQQgyyWW@!      
-     -1vvnvv.     `~+++`        ++|+++           
-      +vnvnnv,                 `-|===            
-       +vnvnvns.           .      :=-            
-        -Invnvvnsi..___..=sv=.     `             
-          +Invnvnvnnnnnnnnvvnn;.                 
-            ~|Invnvnvvnvvvnnv}+`                 
-               -~|{*l}*|~                        
+fg.green                __.;=====;.__                    
+fg.green            _.=+==++=++=+=+===;.                 
+fg.green             -=+++=+===+=+=+++++=_               
+fg.green        .     -=:``     `--==+=++==.             
+fg.green       _vi,    `            --+=++++:            
+fg.green      .uvnvi.       _._       -==+==+.           
+fg.green     .vvnvnI`    .;==|==;.     :|=||=|.          
+fg.bright_black+QmQQmfg.greenpvvnv; fg.bright_black_yYsyQQWUUQQQm #QmQ#fg.green:fg.bright_blackQQQWUV$QQm.    
+fg.bright_black -QQWQWfg.greenpvvofg.bright_blackwZ?.wQQQEfg.green==<fg.bright_blackQWWQ/QWQW.QQWWfg.green(:fg.bright_black jQWQE    
+fg.bright_black  -$QQQQmmU'  jQQQfg.green@+=<fg.bright_blackQWQQ)mQQQ.mQQQC+fg.green;jfg.bright_blackWQQ@'    
+fg.bright_black   -$WQ8Yfg.greennI:fg.bright_black   QWQQwgQQWVfg.green`fg.bright_blackmWQQ.jQWQQgyyWW@!      
+fg.green     -1vvnvv.     `~+++`        ++|+++           
+fg.green      +vnvnnv,                 `-|===            
+fg.green       +vnvnvns.           .      :=-            
+fg.green        -Invnvvnsi..___..=sv=.     `             
+fg.green          +Invnvnvnnnnnnnnvvnn;.                 
+fg.green            ~|Invnvnvvnvvvnnv}+`                 
+fg.green               -~|{*l}*|~                        

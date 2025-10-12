@@ -11,19 +11,21 @@ fn read_lines(filename: &str) -> Vec<String> {
         }
 
         let mut file = fs::File::create(filename).expect("file create error.");
+        println!("Default configuration file generated.");
+        println!("For configuration docs or example configs: \nhttps://github.com/0l3d/ffetch");
         let content = r#"
-           #####
-          #######
-          ##O#O##
-          #######
-        ###########
-       #############
-      ###############
-      ################
-     #################
-   #####################
-   #####################
-     #################
+fg.black           #####
+fg.black          ##fg.white###fg.black##
+fg.black          #fg.white#fg.blackO#Ofg.white#fg.black#
+fg.black          #fg.white#####fg.black#
+fg.black        ##fg.white#######fg.black##
+fg.black       ##fg.white#########fg.black##
+fg.black      ##fg.white###########fg.black##
+fg.black      ##fg.white############fg.black##
+fg.black     ##fg.white#############fg.black##
+fg.black   ##fg.white#################fg.black##
+fg.black   ##fg.white#################fg.black##
+fg.black    ###################
 "#;
         file.write_all(content.as_bytes())
             .expect("file write error.");
@@ -310,10 +312,155 @@ fn get_option(token: &str) -> String {
     String::new()
 }
 
-// fn colorize_ascii(ascii: String) {}
+fn ascii_colorizer_lexer(string: &str) -> Vec<String> {
+    let color_tokens = [
+        "fg.black",
+        "fg.red",
+        "fg.green",
+        "fg.yellow",
+        "fg.blue",
+        "fg.magenta",
+        "fg.cyan",
+        "fg.white",
+        "fg.bright_black",
+        "fg.bright_red",
+        "fg.bright_green",
+        "fg.bright_yellow",
+        "fg.bright_blue",
+        "fg.bright_magenta",
+        "fg.bright_cyan",
+        "fg.bright_white",
+        "bg.black",
+        "bg.red",
+        "bg.green",
+        "bg.yellow",
+        "bg.blue",
+        "bg.magenta",
+        "bg.cyan",
+        "bg.white",
+        "bg.bright_black",
+        "bg.bright_red",
+        "bg.bright_green",
+        "bg.bright_yellow",
+        "bg.bright_blue",
+        "bg.bright_magenta",
+        "bg.bright_cyan",
+        "bg.bright_white",
+        "t.bold",
+        "t.dim",
+        "t.italic",
+        "t.underline",
+        "t.inverse",
+        "t.hidden",
+        "t.strike",
+        "t.bold_off",
+        "t.underline_off",
+        "t.inverse_off",
+        "all.reset",
+    ];
+    let mut tokens = Vec::new();
+    let mut i = 0;
+    let input_chars: Vec<char> = string.chars().collect();
 
-fn write_fetch(ascii: Vec<String>, ascii_color: String) -> String {
-    let max_width = ascii.iter().map(|line| line.len()).max().unwrap_or(0);
+    while i < input_chars.len() {
+        let mut matched = false;
+
+        for &color in &color_tokens {
+            if string[i..].starts_with(color) {
+                tokens.push(color.to_string());
+                i += color.len();
+                matched = true;
+                break;
+            }
+        }
+
+        if !matched {
+            let start = i;
+            while i < input_chars.len() {
+                let mut found_color = false;
+                for &color in &color_tokens {
+                    if string[i..].starts_with(color) {
+                        found_color = true;
+                        break;
+                    }
+                }
+                if found_color {
+                    break;
+                }
+                i += 1;
+            }
+
+            let normal_text: String = input_chars[start..i].iter().collect();
+            tokens.push(normal_text);
+        }
+    }
+    tokens
+}
+
+fn colorize_ascii(ascii: Vec<String>) -> Vec<String> {
+    let mut new_ascii: Vec<String> = Vec::new();
+
+    for asci in ascii.iter() {
+        let tokens = ascii_colorizer_lexer(asci);
+
+        let mut stringer: String = String::new();
+        for token in tokens.iter() {
+            let ansi = parse_ansi_code(token);
+            if !ansi.is_empty() {
+                stringer.push_str(ansi);
+                continue;
+            }
+            stringer.push_str(token);
+        }
+        new_ascii.push(stringer);
+    }
+    new_ascii
+}
+
+fn clean_ansi_len(s: &str) -> usize {
+    let mut visible_len = 0;
+    let mut chars = s.chars().peekable();
+
+    while let Some(c) = chars.next() {
+        if c == '\x1b' {
+            if chars.peek() == Some(&'[') {
+                chars.next();
+                while let Some(&next_c) = chars.peek() {
+                    chars.next();
+                    if next_c == 'm' {
+                        break;
+                    }
+                }
+                continue;
+            }
+        }
+
+        visible_len += 1;
+    }
+
+    visible_len
+}
+
+fn pad_ansi_line(line: &str, target_width: usize) -> String {
+    let visible = clean_ansi_len(line);
+    if visible >= target_width {
+        line.to_string()
+    } else {
+        let padding = " ".repeat(target_width - visible);
+        format!("{}{}", line, padding)
+    }
+}
+
+// TODO: Image Support.
+
+
+
+fn write_fetch(ascii: Vec<String>) -> String {
+    let max_width = ascii
+        .iter()
+        .map(|line| clean_ansi_len(line))
+        .max()
+        .unwrap_or(0);
     let mut ascii_index = 0;
     for i in 0..get_contents().len() {
         let tokens = &get_contents()[i];
@@ -321,26 +468,20 @@ fn write_fetch(ascii: Vec<String>, ascii_color: String) -> String {
         let replaced_conf = parser(lexed_conf);
 
         if find_token(tokens, "echo") {
-            let end_conf = format!(
-                "{}{:<width$}\x1b[0m    {}\x1b[0m",
-                parse_ansi_code(&ascii_color),
-                ascii.get(ascii_index).unwrap_or(&"".to_string()),
-                replaced_conf,
-                width = max_width
-            );
-            ascii_index += 1;
+            let ascii_line = ascii
+                .get(ascii_index)
+                .cloned()
+                .unwrap_or_else(|| "".to_string());
+            let padded = pad_ansi_line(&ascii_line, max_width);
+            let end_conf = format!("{}\x1b[0m   {}\x1b[0m", padded, replaced_conf);
             println!("{end_conf}");
+            ascii_index += 1;
         }
     }
 
     while ascii_index < ascii.len() {
         let line = &ascii[ascii_index];
-        println!(
-            "{}{:<width$}",
-            parse_ansi_code(&ascii_color),
-            line,
-            width = max_width
-        );
+        println!("{}", pad_ansi_line(line, max_width));
         ascii_index += 1;
     }
     "".to_string()
@@ -348,7 +489,7 @@ fn write_fetch(ascii: Vec<String>, ascii_color: String) -> String {
 
 fn main() {
     let ascii_text = get_option("ascii");
-    let ascii = read_lines(&ascii_text);
-    let ascii_color = get_option("ascii_color");
-    write_fetch(ascii, ascii_color);
+    let ascii_raw = read_lines(&ascii_text);
+    let ascii = colorize_ascii(ascii_raw);
+    write_fetch(ascii);
 }

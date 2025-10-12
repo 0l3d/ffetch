@@ -1,22 +1,22 @@
-              .-------------------------:
-             .+=========================.
-            :++===++==================-       :++-
-           :*++====+++++=============-        .==:
-          -*+++=====+***++==========:
-         =*++++========------------:
-        =*+++++=====-                     ...
-      .+*+++++=-===:                    .=+++=:
-     :++++=====-==:                     -*****+
-    :++========-=.                      .=+**+.
-   .+==========-.                          .
-    :+++++++====-                                .--==-.
-     :++==========.                             :+++++++:
-      .-===========.                            =*****+*+
-       .-===========:                           .+*****+:
-         -=======++++:::::::::::::::::::::::::-:  .---:
-          :======++++====+++******************=.
-           :=====+++==========++++++++++++++*-
-            .====++==============++++++++++*-
-             .===+==================+++++++:
-              .-=======================+++:
-                ..........................
+fg.black              .fg.bright_blue-------------------------:
+fg.bright_blue             .fg.green+fg.bright_blue=========================.
+fg.bright_blue            :fg.green++fg.bright_blue===fg.green++===fg.bright_blue===============-       :fg.green++-
+fg.bright_blue           :fg.green*++fg.bright_blue====fg.green+++++==fg.bright_blue===========-        .==:
+fg.bright_blue          -fg.green*+++fg.bright_blue=====fg.green+***++fg.bright_blue==========:
+fg.bright_blue         =fg.green*++++fg.bright_blue========------------:
+fg.bright_blue        =fg.green*+++++=fg.bright_blue====-                     fg.black...
+fg.bright_blue      .fg.green+*+++++fg.bright_blue=-===:                    fg.bright_blue.fg.green=+++=:
+fg.bright_blue     :fg.green++++fg.bright_blue=====-==:                     fg.bright_blue-***fg.green**fg.bright_blue+
+fg.bright_blue    :fg.green++fg.bright_blue========-=.                      .=+**+.
+fg.bright_blue   .fg.green+fg.bright_blue==========-.                          fg.black.
+fg.bright_blue    :fg.green+++++++fg.bright_blue====-                                fg.black.fg.bright_blue--==-fg.black.
+fg.bright_blue     :fg.green++fg.bright_blue==========.                             fg.black:fg.green+++++++fg.black:
+fg.bright_blue      .-===========.                            =*****+*+l
+fg.bright_blue       .-===========:                           .+*****+:
+fg.bright_blue         -=======fg.green++++fg.bright_blue:::::::::::::::::::::::::-: fg.black .fg.bright_blue---:
+fg.bright_blue          :======fg.green++++fg.bright_blue====fg.green+++******************=fg.bright_blue.
+fg.bright_blue           :=====fg.green+++fg.bright_blue==========fg.green++++++++++++++*-
+fg.bright_blue            .====fg.green++fg.bright_blue==============fg.green++++++++++*-
+fg.bright_blue             .===fg.green+fg.bright_blue==================fg.green+++++++:
+fg.bright_blue              .-=======================fg.green+++fg.bright_blue:
+fg.black                ..........................
