@@ -17,6 +17,12 @@ At its core, it works simply and the codebase is easy to understand.
 
 <img width="1100" height="608" alt="image" src="https://github.com/user-attachments/assets/23fcc419-4c0b-4e3e-aeda-b557b45cb690" />
 
+*Advanced Config*
+
+<img width="671" height="177" alt="image" src="https://github.com/user-attachments/assets/1df06cad-e22c-45c2-b85d-479a4e2a4b46" />
+
+*My Own Config*
+
 ---
 
 # ⚙️ **Installation & Configuration**
