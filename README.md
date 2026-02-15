@@ -73,6 +73,10 @@ Docs: [docs.rs/ffetch](https://docs.rs/ffetch/latest/ffetch/)
 
 ---
 
+# Contribute
+
+Check the CONTRIBUTING.md
+
 ## Dependencies
 
 If u're using `getTerm`, u need to make sure xprop is installed.
