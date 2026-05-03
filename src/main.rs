@@ -1,34 +1,12 @@
 pub mod ffetch;
+pub mod platform;
 use std::{fs, io::Write, path::Path};
 
-fn read_lines(filename: &str) -> Vec<String> {
-    let conf_path = Path::new(filename);
-    if !conf_path.exists() {
-        if let Some(parent) = conf_path.parent() {
-            if !parent.exists() {
-                fs::create_dir_all(parent).expect("Parent directory create error.");
-            }
-        }
-
-        let mut file = fs::File::create(filename).expect("file create error.");
-        println!("Default configuration file generated.");
-        println!("For configuration docs or example configs: \nhttps://github.com/0l3d/ffetch");
-        let content = r#"
-fg.black           #####
-fg.black          ##fg.white###fg.black##
-fg.black          #fg.white#fg.blackO#Ofg.white#fg.black#
-fg.black          #fg.white#####fg.black#
-fg.black        ##fg.white#######fg.black##
-fg.black       ##fg.white#########fg.black##
-fg.black      ##fg.white###########fg.black##
-fg.black      ##fg.white############fg.black##
-fg.black     ##fg.white#############fg.black##
-fg.black   ##fg.white#################fg.black##
-fg.black   ##fg.white#################fg.black##
-fg.black    ###################
-"#;
-        file.write_all(content.as_bytes())
-            .expect("file write error.");
+fn read_lines(filename: &str) -> Vec<String> { 
+    if platform::check_first_run(filename) {
+        println!("For extra configuration docs or example configs: \nhttps://github.com/0l3d/ffetch");    
+        println!("Thanks for using F-Fetch! We'll download the ascii for your system. Please wait...");
+        platform::check_platform_and_download_ascii(); 
     }
 
     let mut result = Vec::new();
@@ -72,7 +50,7 @@ echo fg.blue "GPU: " fg.yellow t.bold getGpu
 echo fg.blue "Packages: " fg.yellow t.bold getPackages
 echo fg.blue "Disk: " fg.yellow t.bold getDisk(/)
 echo fg.blue "Desktop: " fg.yellow t.bold getDesktop
-echo fg.blue "Primary: " fg.yellow t.bold getMonitor(0)
+echo fg.blue "Primary Monitor: " fg.yellow t.bold getMonitor(0)
 echo fg.blue "Uptime: " fg.yellow t.bold getUptime
 echo fg.blue "Shell: " fg.yellow t.bold getShell
 
