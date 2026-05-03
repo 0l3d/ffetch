@@ -1,0 +1,11 @@
+{
+  "name": "ffetch-build-wrappers",
+  "private": true,
+  "scripts": {
+    "build": "node build.js",
+    "npm:build": "node build.js",
+    "yarn:build": "node build.js",
+    "pnpm:build": "node build.js",
+    "bun:build": "bun --bun run build.ts"
+  }
+}
