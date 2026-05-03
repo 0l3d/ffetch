@@ -1,3 +1,5 @@
+# Welcome the EASTER EGG!!!!
+
 # 🚀 **F-Fetch:** _Fast, Minimal & Rust-Powered System Fetcher_
 
 F-Fetch is a **very fast**, **minimal** terminal system fetcher written **100% in Rust**.  
