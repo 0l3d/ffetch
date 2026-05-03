@@ -79,8 +79,8 @@ Check the CONTRIBUTING.md
 
 ## Dependencies
 
-If u're using `getTerm`, u need to make sure xprop is installed.
 If `getMonitor` fails, it uses `xrandr`.
+Ascii downloader is using `curl` for download.
 
 For GPU and disk information, I use standard Linux tools like lspci (from pciutils) and df (from coreutils).
 
