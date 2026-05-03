@@ -449,8 +449,8 @@ pub fn get_os_name() -> Result<String, Error> {
     })?;
 
     for line in contents.lines() {
-        if line.starts_with("NAME=") {
-            let name = line.trim_start_matches("NAME=").trim_matches('"').trim();
+        if line.starts_with("PRETTY_NAME=") {
+            let name = line.trim_start_matches("PRETTY_NAME=").trim_matches('"').trim();
 
             if name.is_empty() {
                 return Err(Error::new(
@@ -465,7 +465,37 @@ pub fn get_os_name() -> Result<String, Error> {
 
     Err(Error::new(
         ErrorKind::NotFound,
-        "OS name (NAME=) not found in /etc/os-release.",
+        "OS name (PRETTY_NAME=) not found in /etc/os-release.",
+    ))
+}
+
+/// DISTRO ID (For Development and Platform Specific things.)
+pub fn devfunc_get_os_id() -> Result<String, Error> {
+    let contents = read_to_string("/etc/os-release").map_err(|e| {
+        Error::new(
+            e.kind(),
+            "Failed to read /etc/os-release. Are you running Linux?",
+        )
+    })?;
+
+    for line in contents.lines() {
+        if line.starts_with("ID=") {
+            let name = line.trim_start_matches("ID=").trim_matches('"').trim();
+
+            if name.is_empty() {
+                return Err(Error::new(
+                    ErrorKind::InvalidData,
+                    "OS name is empty in /etc/os-release.",
+                ));
+            }
+
+            return Ok(name.to_string());
+        }
+    }
+
+    Err(Error::new(
+        ErrorKind::NotFound,
+        "OS name (ID=) not found in /etc/os-release.",
     ))
 }
 
@@ -1364,39 +1394,6 @@ pub fn get_monitor(monitor_index: usize) -> String {
 /// This function requires X11 and the `xprop` utility to be available.
 /// It may not work in Wayland environments.
 pub fn get_terminal() -> String {
-    let output = Command::new("xprop")
-        .args(["-root", "_NET_ACTIVE_WINDOW"])
-        .output()
-        .expect("xprop run error.");
-
-    let stdout = String::from_utf8_lossy(&output.stdout);
-
-    let window_id = stdout
-        .split("window id # ")
-        .nth(1)
-        .map(|s| s.trim().to_string())
-        .unwrap_or_else(|| {
-            eprintln!("⚠️ Window not found.");
-            "".to_string()
-        });
-
-    let output = Command::new("xprop")
-        .args(["-id", &window_id])
-        .output()
-        .expect("xprop id run error.");
-
-    let info = String::from_utf8_lossy(&output.stdout);
-    for line in info.lines() {
-        if line.starts_with("WM_CLASS") {
-            if let Some(start) = line.find('"') {
-                if let Some(end) = line[start + 1..].find('"') {
-                    let terminal = &line[start + 1..start + 1 + end];
-                    return terminal.to_string();
-                }
-            }
-        }
-    }
-
     env::var("TERM").unwrap_or_else(|_| "Unknown".to_string())
 }
 
