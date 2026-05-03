@@ -7,5 +7,9 @@
     "yarn:build": "node build.js",
     "pnpm:build": "node build.js",
     "bun:build": "bun --bun run build.ts"
+  },
+  "devDependencies": {
+    "@types/node": "^25.6.0",
+    "typescript": "^6.0.3"
   }
 }

@@ -1,12 +1,5 @@
 #!/usr/bin/env node
 
-declare const __dirname: string;
-declare const process: {
-  env: Record<string, string | undefined>;
-  exit(code?: number): never;
-};
-declare function require(name: string): any;
-
 const cp = require("node:child_process");
 const path = require("node:path");
 
