@@ -1,1 +1,6 @@
 /target
+.zig-cache
+.zig-cache-global
+zig-out
+node_modules
+codex

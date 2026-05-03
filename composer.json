@@ -1,0 +1,7 @@
+{
+  "name": "oled/ffetch-build-wrappers",
+  "type": "project",
+  "scripts": {
+    "build": "php build.php"
+  }
+}
