@@ -1,6 +1,6 @@
 use std::{
     env,
-    fs::{metadata, read, read_dir, read_link, read_to_string, File},
+    fs::{metadata, read, read_dir, read_link, read_to_string, File, exists},
     io::{BufRead, BufReader, Error, ErrorKind},
     path::Path,
     process::Command,
@@ -838,11 +838,20 @@ pub fn get_packages() -> Result<String, Error> {
         }
     }
 
+
     let rpm_managers = ["dnf", "yum", "zypper"];
     match count_rpm() {
         Ok(count) if count > 0 => {
             for name in &rpm_managers {
-                results.push(format!("{count} ({name})"));
+                let full_path = format!("/usr/bin/{}", name);
+                let output = exists(full_path);
+                match output {
+                    Ok(true) => {
+                        results.push(format!("{count} ({name})"));
+                    },
+                    Ok(false) => continue,
+                    _ => break
+                }
             }
         }
         _ => {}
