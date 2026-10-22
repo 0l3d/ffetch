@@ -39,7 +39,7 @@ paru -S ffetch-git
 ### Install via `makepkg`
 
 ```bash
-git clone --depth=1 https://git.sr.ht/~oled/ffetch
+git clone --depth=1 https://github.com/0l3d/ffetch
 cd ffetch
 makepkg -si
 ```
@@ -53,7 +53,7 @@ cargo install ffetch
 ## 🚀 **Installation Script**
 
 ```bash
-bash <(curl -s https://git.sr.ht/~oled/ffetch/blob/master/install.sh)
+bash <(curl -s https://github.com/0l3d/ffetch/blob/master/install.sh)
 ```
 
 ## 🏃 **Run F-Fetch**
