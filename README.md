@@ -314,8 +314,3 @@ ascii_color = "fg.cyan"
 
 ---
 
-## ☕ Support the project
-
-If you like F-Fetch and want to support the development, consider buying me a coffee:
-
-👉 [https://buymeacoffee.com/oled](https://buymeacoffee.com/oled)
